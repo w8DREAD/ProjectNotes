@@ -7,6 +7,8 @@ const exphbs = require('express-handlebars')
 
 const indexRouter = require('./routes/index')
 const usersRouter = require('./routes/users')
+const newsRouter = require('./routes/news')
+const featuresRouter = require('./routes/features')
 
 const app = express()
 
@@ -27,7 +29,10 @@ app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.use('/', indexRouter)
+app.use('/news', newsRouter)
+app.use('/features', featuresRouter)
 app.use('/users', usersRouter)
+
 
 app.use(function (req, res, next) {
   next(createError(404))

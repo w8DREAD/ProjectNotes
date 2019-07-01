@@ -4,9 +4,10 @@ const bodyParser = require('body-parser')
 const app = express()
 
 router.get('/', function (req, res, next) {
-  res.render('index', {
-    title: 'Заметки',
-    style_main: '#FF0000' })
+  res.render('features', {
+    features: 'Тут будут фичи',
+    style_features: '#FF0000'
+  })
 })
 
 module.exports = router

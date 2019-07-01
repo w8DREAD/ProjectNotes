@@ -1,1 +1,18 @@
 <h2>{{news}}</h2>
+
+<form method="POST">
+<div class="input-group mb-3">
+    <div class="input-group-prepend">
+        <button class="btn btn-outline-secondary" type="submit" id="button-addon1">Опубликовать</button>
+    </div>
+    <input type="text" class="form-control" placeholder="" aria-label="Example text with button addon" aria-describedby="button-addon1" name="articles">
+</div>
+</form>
+
+{{#articles}}
+
+    <div class="articles_news">
+{{.}}
+    </div>
+
+{{/articles}}
