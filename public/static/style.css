@@ -13,3 +13,16 @@ a {
   border: solid 1px #000000;
   border-radius: 25px;
 }
+
+.active:hover {
+  background: #FF0000;
+}
+
+.active {
+  background: #FF0000;
+}
+
+.tags {
+  float: left;
+  margin: 3px 0px 3px 15px;
+}

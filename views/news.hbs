@@ -12,7 +12,11 @@
 {{#articles}}
 
     <div class="articles_news">
-{{.}}
+{{news}}
+        <p>
+            <tag class="tags">{{#tags}}<a href="">{{.}}</a>{{/tags}}</tag>
+        </p>
     </div>
+
 
 {{/articles}}
