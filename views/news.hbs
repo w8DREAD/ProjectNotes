@@ -11,9 +11,9 @@
 
     {{#articles}}
 
-        <form class="articles-news" name="news">
-            {{news}}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close" formmethod="post" name="delete">
+        <form class="articles-news" name="news" _method="put"  id="{{rowId}}">
+            {{post}}
+            <button type="submit" class="close" data-dismiss="alert" aria-label="Close" name="delete" >
                 <span aria-hidden="true">&times;</span>
             </button>
             <p>
