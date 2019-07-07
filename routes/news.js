@@ -4,7 +4,6 @@ const bodyParser = require('body-parser')
 const app = express()
 const db = require('../db/database')
 const control = require('../mvc/control')
-const view = require('../mvc/view')
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
@@ -30,8 +29,12 @@ router.get('/', (req, res, next) => {
   })
 })
 
-router.post('/', async (req, res, next) => {
-  await arrayPosts.push(control.GetPost.forRender(req.body.articles.split(' ')))
+
+router.post('/', (req, res, next) => {
+  let post = req.body.post.split(' ')
+  if(post) {
+    arrayPosts.push(control.GetPost.forRender(post))
+  }
   // let arrArticle = req.body.articles.split(' ')
   // let tags = JSON.stringify(arrArticle.filter(str => str[0] == '#'))
   // let post = arrArticle.filter(str => str[0] != '#').join(' ')
