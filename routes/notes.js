@@ -11,7 +11,7 @@ router.get('/', (req, res, next) => {
   res.render('notes', {
     news: 'Тут будут новости',
     addClassNews: 'active',
-    notes: control.GetNote.forRendering()
+    notes: control.forRendering()
   })
 })
 

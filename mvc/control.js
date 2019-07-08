@@ -6,13 +6,15 @@ class GetNote {
     this.tagsText = tagsText
     this.notesText = notesText
   }
-  static forRendering () {
-    return Handler.renderFromDb()
+  static async forRendering () {
+    let data = await Handler.renderFromDb()
+    console.log('1')
+    return data
   }
-  static sendNoteInDb (request) {
-    let notes = new GetNote(request.tagsText, request.notesText)
+  static async sendNoteInDb (request) {
+    let notes = await new GetNote(request.tagsText, request.notesText)
     Handler.saveDb(notes)
   }
 }
 
-module.exports = { GetNote: GetNote }
+module.exports = GetNote
