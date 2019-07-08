@@ -1,9 +1,11 @@
 const sqlite = require('sqlite3').verbose()
-
 let articles = []
+class Database {
+  constructor () {
 
-function dbConnect (method, post, tags) {
-  return new Promise((resolve, reject) => {
+  }
+
+  static pushIn (notes) {
     const db = new sqlite.Database('data.db', (err) => {
       if (err) {
         return console.error(err.message)
@@ -11,38 +13,47 @@ function dbConnect (method, post, tags) {
       console.log('Connected to the "data.db".')
     })
     db.serialize(() => {
-      db.run('CREATE TABLE IF NOT EXISTS notes (post TEXT, tags TEXT)')
-      if (method == 'post') {
-        let stmt = db.prepare('INSERT INTO notes VALUES (?,?)', [], (err) => {
-          if (err) {
-            return console.log('This is error ' + err)
-          }
-        })
-        stmt.run(post, tags)
-        stmt.finalize()
-      }
+      db.run('CREATE TABLE IF NOT EXISTS notes (tagsText TEXT, notesText TEXT)')
+      let stmt = db.prepare('INSERT INTO notes VALUES (?,?)', [], (err) => {
+        if (err) {
+          return console.log('This is error ' + err)
+        }
+      })
+      stmt.run(notes.tagsText, notes.notesText)
+      stmt.finalize()
+      db.close((err) => {
+        if (err) {
+          return console.error(err.message)
+        }
+        console.log('Close the database connection.')
+      })
+    })
+  }
 
+  static renderFrom () {
+    const db = new sqlite.Database('data.db', (err) => {
+      if (err) {
+        return console.error(err.message)
+      }
       articles = []
-      db.each('SELECT rowid AS id, post, tags FROM notes', (err, row) => {
+      console.log('Connected to the "data.db".')
+    })
+    db.serialize(() => {
+      db.each('SELECT rowid AS id, tagsText, notesText FROM notes', (err, row) => {
         if (err) {
           return console.log('This is error ' + err.message)
         }
-        articles.push({ rowId: row.id, post: row.post, tags: JSON.parse(row.tags) })
+        articles.push({ id: row.id, tagsText: row.tagsText, notesText: row.notesText })
       })
     })
-
     db.close((err) => {
       if (err) {
         return console.error(err.message)
       }
       console.log('Close the database connection.')
     })
-    if (articles) {
-      resolve(articles)
-    } else {
-      reject(new Error('error'))
-    }
-  })
+    console.log('ARRRR----' + articles)
+  }
 }
 
-module.exports = dbConnect
+module.exports = Database

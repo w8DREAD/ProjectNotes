@@ -7,8 +7,9 @@ const exphbs = require('express-handlebars')
 
 const indexRouter = require('./routes/index')
 const usersRouter = require('./routes/users')
-const newsRouter = require('./routes/news')
+const notesRouter = require('./routes/notes')
 const featuresRouter = require('./routes/features')
+const addNotesRouter = require('./routes/addNotes')
 
 const app = express()
 
@@ -30,9 +31,10 @@ app
   .use(express.static(path.join(__dirname, 'public')))
 
   .use('/', indexRouter)
-  .use('/news', newsRouter)
+  .use('/notes', notesRouter)
   .use('/features', featuresRouter)
   .use('/users', usersRouter)
+  .use('/addNotes', addNotesRouter)
 
   .use(function (req, res, next) {
     next(createError(404))

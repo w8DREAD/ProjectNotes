@@ -1,0 +1,17 @@
+<h2>{{news}}</h2>
+
+    {{#articles}}
+
+        <form class="articles-news" name="news" _method="put"  id="{{rowId}}">
+            <p>
+                <tag class="tags"><a href="">{{tagsText}}</a></tag>
+            </p>
+            {{notesText}}
+            <button type="submit" class="close" data-dismiss="alert" aria-label="Close" name="delete" >
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </form>
+
+
+    {{/articles}}
+
