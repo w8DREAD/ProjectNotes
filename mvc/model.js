@@ -1,20 +1,19 @@
 const db = require('../db/database')
 const control = require('./control')
 
-
 class Handler {
-
-  constructor() {
+  constructor () {
 
   }
 
-  static async saveDb(notes) {
+  static saveDb (notes) {
     db.pushIn(notes)
+    console.log('call write')
   }
 
-  static async renderFromDb() {
+  static async renderFromDb () {
     console.log('2')
-    return await db.renderFrom()
+    return db.renderFrom()
   }
 }
 module.exports = Handler

@@ -8,7 +8,7 @@ router.get('/', (req, res, next) => {
 })
 
 router.post('/', (req, res, next) => {
-  control.GetNote.sendNoteInDb(req.body)
+  control.sendNoteInDb(req.body)
   res.redirect('/notes')
 })
 

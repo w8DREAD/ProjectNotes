@@ -11,8 +11,9 @@ class GetNote {
     console.log('1')
     return data
   }
-  static async sendNoteInDb (request) {
-    let notes = await new GetNote(request.tagsText, request.notesText)
+  static sendNoteInDb (request) {
+    let notes = new GetNote(request.tagsText, request.notesText)
+    console.log('call call write')
     Handler.saveDb(notes)
   }
 }

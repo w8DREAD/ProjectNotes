@@ -1,7 +1,7 @@
 const sqlite = require('sqlite3').verbose()
 const Handler = require('../mvc/model')
 
-const test = [{id: 1, tagsText: 'dasdasda', notesText: 'eqweqwesd'}, {id: 2, tagsText: 'vccvcvx', notesText: 'hgfhfghfgh'}, {id: 3, tagsText: 'yyyyyyyyyyy', notesText: 'ssssssssss'}]
+const test = [{ id: 1, tagsText: 'dasdasda', notesText: 'eqweqwesd' }, { id: 2, tagsText: 'vccvcvx', notesText: 'hgfhfghfgh' }, { id: 3, tagsText: 'yyyyyyyyyyy', notesText: 'ssssssssss' }]
 let articles = []
 
 class Database {
@@ -9,72 +9,57 @@ class Database {
 
   }
 
- static async pushIn (notes) {
-    const db = new sqlite.Database('data.db', (err) => {
+  static async pushIn (notes) {
+    const db = await new sqlite.Database('data.db', (err) => {
       if (err) {
         return console.error(err.message)
       }
       console.log('Connected to the "data.db".')
-    })
-   try {
-      await db.serialize( async () => {
+      db.serialize(() => {
         db.run('CREATE TABLE IF NOT EXISTS notes (tagsText TEXT, notesText TEXT)')
-        try {
-          let stmt = await db.prepare('INSERT INTO notes VALUES (?,?)', [], (err) => {
-            if (err) {
-              return console.log('This is error ' + err)
-            }
-          })
-          stmt.run(notes.tagsText, notes.notesText)
-          stmt.finalize()
-        }
-        catch (e) {
-          return console.log(e.message)
-        }
-        db.close((err) => {
+        let stmt = db.prepare('INSERT INTO notes VALUES (?,?)', (err) => {
           if (err) {
-            return console.error(err.message)
+            return console.log('This is error ' + err)
           }
         })
+        stmt.run(notes.tagsText, notes.notesText)
+        stmt.finalize()
+        console.log(notes)
       })
-     return  console.log('Close the database connection.')
-   }
-   catch (e) {
-     return console.log(e.message)
-   }
-
+    })
+    db.close((err) => {
+      if (err) {
+        return console.error(err.message)
+      }
+      return console.log('Close the database connection.')
+    })
   }
 
   static async renderFrom () {
-
-    async function pushNotes(note) {
-      articles.push(note)
-    }
-
-    const db = new sqlite.Database('data.db', (err) => {
+    const db = await new sqlite.Database('data.db', (err) => {
       if (err) {
         return console.error(err.message)
       }
-      console.log('Connected to the "data.db".')
-      db.serialize(async () => {
-        db.each('SELECT rowid AS id, tagsText, notesText FROM notes', async (err, row) => {
-          if (err) {
-            return console.log('This is error ' + err.message)
-          }
-          await pushNotes(row)
-        })
-        console.log(articles)
-      })
+      return console.log('Connected to the "data.db".')
     })
-
+    console.log('111')
+    db.serialize(() => {
+      db.all('SELECT rowid AS id, * FROM notes', (err, row) => {
+        if (err) {
+          return console.log('This is error ' + err.message)
+        }
+        return row
+      })
+      console.log('222')
+    })
     db.close((err) => {
       if (err) {
         return console.error(err.message)
       }
       console.log('Close the database connection.')
     })
+    console.log('333')
   }
 }
-
 
 module.exports = Database
