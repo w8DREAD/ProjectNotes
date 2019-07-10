@@ -8,8 +8,8 @@ router.get('/', (req, res, next) => {
 })
 
 router.post('/', (req, res, next) => {
-  const {tagsText, notesText} = req.body
-  control.sendNoteInDb({tagsText, notesText})
+  const { tagsText, notesText } = req.body
+  control.sendNoteInDb({ tagsText, notesText })
   res.redirect('/notes')
 })
 

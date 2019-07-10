@@ -1,17 +1,47 @@
-<h2>{{news}}</h2>
+<h2 class="title">{{news}}</h2>
 
     {{#notes}}
 
-        <form class="articles-news" name="news" _method="put"  id="{{rowId}}">
-            <p>
-                <tag class="tags"><a href="">{{tagsText}}</a></tag>
-            </p>
-            {{notesText}}
-            <button type="submit" class="close" data-dismiss="alert" aria-label="Close" name="delete" >
-                <span aria-hidden="true">&times;</span>
-            </button>
+        <form class="articles-news" name="news" _method="put" id="{{id}}">
+            <div class="notes">
+                <p>
+                    <a href="">{{tagsText}}</a>
+                    <button type="submit" class="close" data-dismiss="alert" aria-label="Close" name="delete" >
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </p>
+
+            </div>
+            <div class="notes">
+                {{notesText}}
+
+                <button type="submit" class="close" data-dismiss="alert" aria-label="Close" name="delete" >
+                    <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample" style="font-size: 14px">
+                        комментарии
+                    </a>
+                    <span style="color: red">&heartsuit; {{id}}</span>
+                </button>
+            </div>
+
+
         </form>
 
+        <div class="collapse" id="collapseExample">
+            {{#comments}}
+            <div class="articles-news comments">
+               {{comment}}<br>
+                <span aria-hidden="true" style="float: right">Автор {{author}}</span>
+            </div>
 
+            {{/comments}}
+            <form method="post">
+            <div class="input-group add-notes">
+                <div class="input-group-prepend">
+                    <button class="input-group-text" type="submit">Добавить</button>
+                </div>
+                <input type="tags" class="form-control" id="inputComment" placeholder="напиши комментарий" name="comment">
+            </div>
+            </form>
+        </div>
     {{/notes}}
 

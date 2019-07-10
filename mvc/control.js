@@ -1,21 +1,27 @@
-const Handler = require('./model')
+const handler = require('./model')
 
 class GetNote {
   constructor (tagsText, notesText, postId = 0) {
     this.id = postId
     this.tagsText = tagsText
     this.notesText = notesText
+    this.comments = []
   }
   static async forRendering () {
-    let data = await Handler.renderFromDb()
-    console.log('1')
-    return data
+    console.log(await handler.Notes.renderFromDb())
+    return handler.Notes.renderFromDb()
   }
-  static sendNoteInDb ({tagsText, notesText}) {
+  static sendNoteInDb ({ tagsText, notesText }) {
     let notes = new GetNote(tagsText, notesText)
-    console.log('call call write')
-    Handler.saveDb(notes)
+    handler.Notes.pushInDb(notes)
   }
 }
 
-module.exports = GetNote
+class Comment {
+  constructor (comment, author) {
+    this.comment = comment
+    this.author = author
+  }
+}
+
+module.exports = { GetNote }
