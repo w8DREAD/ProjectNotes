@@ -9,7 +9,7 @@ router.get('/', (req, res, next) => {
 
 router.post('/', (req, res, next) => {
   const { tagsText, notesText } = req.body
-  control.sendNoteInDb({ tagsText, notesText })
+  control.GetNote.sendNoteInDb({ tagsText, notesText })
   res.redirect('/notes')
 })
 

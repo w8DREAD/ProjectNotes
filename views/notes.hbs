@@ -2,46 +2,46 @@
 
     {{#notes}}
 
-        <form class="articles-news" name="news" _method="put" id="{{id}}">
+        <form class="articles-news" name="news" method="post">
             <div class="notes">
                 <p>
                     <a href="">{{tagsText}}</a>
-                    <button type="submit" class="close" data-dismiss="alert" aria-label="Close" name="delete" >
+                    <button type="submit" class="close" data-dismiss="alert" aria-label="Close" name="delete" id="{{id}}">
                     <span aria-hidden="true">&times;</span>
                 </button>
                 </p>
 
             </div>
-            <div class="notes">
+            <div class="notes" style="margin-bottom: 15px">
                 {{notesText}}
-
-                <button type="submit" class="close" data-dismiss="alert" aria-label="Close" name="delete" >
-                    <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample" style="font-size: 14px">
-                        комментарии
-                    </a>
+                <button type="submit" class="close" data-dismiss="alert" aria-label="Close" name="like">
                     <span style="color: red">&heartsuit; {{id}}</span>
                 </button>
             </div>
 
 
-        </form>
 
-        <div class="collapse" id="collapseExample">
+
+        <div class="collapse" id="collapseExample{{id}}">
             {{#comments}}
             <div class="articles-news comments">
                {{comment}}<br>
-                <span aria-hidden="true" style="float: right">Автор {{author}}</span>
+                <span aria-hidden="true" style="float: right">{{author}}</span>
             </div>
 
             {{/comments}}
-            <form method="post">
+
             <div class="input-group add-notes">
                 <div class="input-group-prepend">
                     <button class="input-group-text" type="submit">Добавить</button>
                 </div>
-                <input type="tags" class="form-control" id="inputComment" placeholder="напиши комментарий" name="comment">
+                <input type="tags" class="form-control" id="inputComment1" placeholder="напиши комментарий" name="{{id}}">
             </div>
-            </form>
         </div>
+            <a data-toggle="collapse" href="#collapseExample{{id}}" role="button" aria-expanded="false"
+               aria-controls="collapseExample{{id}}" style="font-size: 14px; float: right; padding-top: 10px; margin-right: 15px">
+                комментарии
+            </a>
+        </form>
     {{/notes}}
 

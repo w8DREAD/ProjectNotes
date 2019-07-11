@@ -9,9 +9,6 @@ app.use(bodyParser.json())
 
 router.get('/', async (req, res, next) => {
   let data = await control.GetNote.forRendering() || []
-  data.forEach((obj) => {
-    obj.comments = [{ comment: '123123', author: 'bob' }, { comment: '12eqweqw3123', author: 'tim' }, { comment: 'bhnhhnh', author: 'kaly' }, { comment: 'vbgbgbg', author: 'ment' }, { comment: '78o778i', author: 'max' }]
-  })
   res.render('notes', {
     news: 'Тут будут новости',
     addClassNews: 'active',
@@ -19,8 +16,10 @@ router.get('/', async (req, res, next) => {
   })
 })
 router.post('/', (req, res, next) => {
-  const comment = req.body
-  console.log(comment)
+  let data = req.body
+  let id = Object.keys(data)[0]
+  let text = req.body[id]
+  control.Comment.sendCommentInDb(id, text)
   res.redirect('/notes')
 })
 
@@ -29,7 +28,8 @@ router.put('/', (req, res, next) => {
 })
 
 router.delete('/', (req, res, next) => {
-
+console.log(req.body)
+  res.redirect('/notes')
 })
 
 module.exports = router
