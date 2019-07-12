@@ -8,6 +8,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
 router.get('/', async (req, res, next) => {
+  console.log('loading page')
   let data = await control.GetNote.forRendering() || []
   res.render('notes', {
     news: 'Тут будут новости',
@@ -15,11 +16,11 @@ router.get('/', async (req, res, next) => {
     notes: data.reverse()
   })
 })
-router.post('/', (req, res, next) => {
+router.post('/', async (req, res, next) => {
   let data = req.body
   let id = Object.keys(data)[0]
   let text = req.body[id]
-  control.Comment.sendCommentInDb(id, text)
+  await control.Comment.sendCommentInDb(id, text)
   res.redirect('/notes')
 })
 
@@ -28,8 +29,9 @@ router.put('/', (req, res, next) => {
 })
 
 router.delete('/', (req, res, next) => {
-console.log(req.body)
-  res.redirect('/notes')
+  let id = req.body.id
+  control.GetNote.deleteNote(id)
+  res.send('ok')
 })
 
 module.exports = router

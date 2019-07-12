@@ -11,9 +11,13 @@ class GetNote {
   static async forRendering () {
     return handler.Notes.renderFromDb()
   }
-  static sendNoteInDb ({ tagsText, notesText }) {
+  static async sendNoteInDb ({ tagsText, notesText }) {
     let notes = new GetNote(tagsText, notesText)
-    handler.Notes.pushInNoteDb(notes)
+    await handler.Notes.pushInNoteDb(notes)
+    return console.log('push note complete')
+  }
+  static async deleteNote (id) {
+    handler.Notes.deleteNoteFromDb(id)
   }
 }
 
@@ -23,10 +27,10 @@ class Comment {
     this.comment = comment
     this.author = author
   }
-  static sendCommentInDb (id, text) {
+  static async sendCommentInDb (id, text) {
     let comment = new Comment(id, text, 'author')
-    console.log(comment)
-    handler.Notes.pushInCommentDb(comment)
+    await handler.Notes.pushInCommentDb(comment)
+    return console.log('push comment complete')
   }
 }
 

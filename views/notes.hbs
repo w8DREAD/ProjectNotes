@@ -6,15 +6,15 @@
             <div class="notes">
                 <p>
                     <a href="">{{tagsText}}</a>
-                    <button type="submit" class="close" data-dismiss="alert" aria-label="Close" name="delete" id="{{id}}">
-                    <span aria-hidden="true">&times;</span>
+                    <button type="submit" class="close button" data-dismiss="alert" aria-label="Close" name="delete">
+                    <span aria-hidden="true" id="{{id}}">&times;</span>
                 </button>
                 </p>
 
             </div>
             <div class="notes" style="margin-bottom: 15px">
                 {{notesText}}
-                <button type="submit" class="close" data-dismiss="alert" aria-label="Close" name="like">
+                <button type="submit" class="like" data-dismiss="alert" aria-label="Close" name="like">
                     <span style="color: red">&heartsuit; {{id}}</span>
                 </button>
             </div>

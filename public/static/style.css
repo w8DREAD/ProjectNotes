@@ -5,6 +5,10 @@ body {
   padding-bottom: 140px;
 }
 
+button:focus {
+  outline:0
+}
+
 a {
   color: #00B7FF;
 }
@@ -49,6 +53,37 @@ a {
 
 .notes {
   margin-top: 10px;
+}
+
+.like {
+  float:right;
+  font-size:1.5rem;
+  font-weight:700;
+  line-height: 1;
+  color:#000;
+  text-shadow:0 1px 0 #fff;
+  opacity:.5;
+}
+
+.like:hover {
+  color:#000;
+  text-decoration:none;
+}
+
+.like:not(:disabled):not(.disabled):focus,
+.like:not(:disabled):not(.disabled):hover {
+  opacity:.75;
+}
+
+button.like {
+  padding:0;
+  background-color:transparent;
+  border:0;-webkit-appearance:none;
+  -moz-appearance:none;
+  appearance:none;
+}
+a.like.disabled {
+  pointer-events:none;
 }
 
 footer {

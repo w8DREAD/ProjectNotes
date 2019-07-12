@@ -7,9 +7,9 @@ router.get('/', (req, res, next) => {
   res.render('addNotes')
 })
 
-router.post('/', (req, res, next) => {
+router.post('/', async (req, res, next) => {
   const { tagsText, notesText } = req.body
-  control.GetNote.sendNoteInDb({ tagsText, notesText })
+  await control.GetNote.sendNoteInDb({ tagsText, notesText })
   res.redirect('/notes')
 })
 

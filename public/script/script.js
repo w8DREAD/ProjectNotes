@@ -1,24 +1,20 @@
 const xhr = new XMLHttpRequest()
-const deleteNote = document.getElementById('1')
-const id = 1
-const getData = 'POST' + id
 
-xhr.open('delete', '/notes', true)
-xhr.setRequestHeader('Content-Type', 'application/x-www-urlencoded')
+xhr.open('delete', '/notes', false)
+xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
 
-deleteNote.addEventListener('click', () => {
-  xhr.send(getData)
-
-  if (xhr.status != 200) {
-    // обработать ошибку
-    alert(xhr.status + ': ' + xhr.statusText) // пример вывода: 404: Not Found
-  } else {
-    // вывести результат
-    alert(xhr.responseText)
+addEventListener('click', function (e) { // Вешаем обработчик клика на UL, не LI
+  if (e.target.parentNode.className == 'close button') {
+    let data = 'id=' + e.target.id
+    xhr.send(data)
+    if (xhr.readyState != 4) {
+      return
+    }
   }
-  // 2. Конфигурируем его: GET-запрос на URL 'phones.json'
 
-  // 3. Отсылаем запрос
-
-  // 4. Если код ответа сервера не 200, то это ошибка
+  if (xhr.status === 200) {
+    console.log('result', xhr.responseText)
+  } else {
+    console.log('err', xhr.responseText)
+  }
 })
