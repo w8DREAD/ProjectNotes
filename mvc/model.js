@@ -1,17 +1,59 @@
 const sqlite = require('sqlite3').verbose()
 
+const openDb = async () => {
+  return new Promise((resolve, reject) => {
+    let data = new sqlite.Database('data.db', (err, data) => {
+      if (err) {
+        reject(err)
+      } else {
+        return data
+      }
+    })
+    resolve(data)
+    console.log('Connected to the "data.db".')
+  })
+}
+
+async function selectFromTable (db, table) {
+  return new Promise((resolve, reject) => {
+    db.all(`SELECT rowid AS id, * FROM ${table}`, (err, data) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve(data)
+      }
+    })
+  })
+}
+
+async function relations () {
+  openDb()
+    .then(async db => {
+      let comments = await selectFromTable(db, 'comments')
+      let relation = db.prepare('INSERT INTO notes_comments VALUES (?,?)', err => {
+        if (err) {
+          return (err)
+        }
+      })
+      let noteId = comments[comments.length - 1].postId
+      let commentId = comments.length
+      relation.run(commentId, noteId)
+      relation.finalize()
+      db.close()
+      console.log('Close the database connection.')
+      return console.log('Комментарий сохранен')
+    })
+}
+
 class Notes {
   constructor () {
 
   }
 
   static async pushInNoteDb (notes) {
-    return new Promise(resolve => {
-      let data = new sqlite.Database('data.db')
-      resolve(data)
-      console.log('Connected to the "data.db".')
-    })
+    return openDb()
       .then(db => {
+        console.log(db)
         return new Promise((resolve, reject) => {
           db.serialize(() => {
             db.run('CREATE TABLE IF NOT EXISTS notes (tagsText TEXT, notesText TEXT)', err => {
@@ -39,10 +81,12 @@ class Notes {
             pushNote.run(notes.tagsText, notes.notesText)
             pushNote.finalize()
           })
-          db.close()
-          console.log('Close the database connection.')
-          resolve(console.log('Заметка сохранена'))
+          resolve('Заметка сохранена')
         })
+          .then(messageOk => {
+            db.close()
+            return console.log(messageOk)
+          })
       })
       .catch(reject => {
         return console.log('Заметки: Ошибка работы с БД ---> ' + reject.message)
@@ -50,25 +94,23 @@ class Notes {
   }
 
   static async pushInCommentDb (comment) {
-    let db
-    return new Promise(resolve => {
-      let data = new sqlite.Database('data.db')
-      resolve(data)
-      console.log('Connected to the "data.db".')
-    })
-      .then(data => {
-        db = data
-        let pushComment = db.prepare('INSERT INTO comments VALUES (?,?,?)', err => {
-          if (err) {
-            console.log('errr')
-            return (err)
-          }
+    return openDb()
+      .then(db => {
+        return new Promise((resolve, reject) => {
+          db.run(`INSERT INTO comments VALUES (?,?,?)`, [comment.comment, comment.author, comment.postId], err => {
+            if (err) {
+              reject(err)
+            }
+            resolve('Complete')
+          })
         })
-        pushComment.run(comment.comment, comment.author, comment.postId)
-        pushComment.finalize()
-        db.close()
-        console.log('Close the database connection.')
-        return console.log('Комментарий сохранен')
+          .then(() => {
+            db.close()
+            console.log('Close the database connection.')
+            return relations()
+          })
+        // pushComment.run(comment.comment, comment.author, comment.postId)
+        // pushComment.finalize()
       })
       .catch(reject => {
         return console.log('Комментарии: Ошибка работы с БД ---> ' + reject.message)
@@ -78,71 +120,32 @@ class Notes {
   static async renderFromDb () {
     let arrayNotes
     let arrayComments
-    return new Promise(resolve => {
-      let data = new sqlite.Database('data.db')
-      resolve(data)
-      console.log('Connected to the "data.db".')
-    })
-      .then(db => {
-        arrayNotes = new Promise((resolve, reject) => {
-          db.all('SELECT rowid AS id, * FROM notes', (err, arrayNotes) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(arrayNotes)
-            }
-          })
-        })
-        arrayComments = new Promise((resolve, reject) => {
-          db.all('SELECT rowid AS id, * FROM comments', (err, arrayComments) => {
-            if (err) {
-              reject(err)
-            } else {
-              resolve(arrayComments)
-            }
-          })
-        })
-        return Promise.all([arrayNotes, arrayComments])
-          .then(([arrayNotes, arrayComments]) => {
-            if (arrayComments.length) {
-              let notesId = arrayComments[0].postId
-              console.log(arrayComments)
-              let commentId = arrayComments.reverse()[0].id
-              let relation = db.prepare('INSERT INTO notes_comments VALUES (?,?)', err => {
-                if (err) {
-                  return (err)
-                }
+    return openDb()
+      .then(async db => {
+        try {
+          arrayNotes = await selectFromTable(db, 'notes')
+          arrayComments = await selectFromTable(db, 'comments')
+          return Promise.all([arrayNotes, arrayComments])
+            .then(([arrayNotes, arrayComments]) => {
+              db.close()
+              console.log('Close the database connection.')
+              let notes = arrayNotes.map(note => {
+                note.comments = arrayComments.filter(comment => {
+                  if (comment.postId == note.id) {
+                    return comment
+                  }
+                })
+                return note
               })
-              console.log('23123 = ' + commentId)
-              relation.run(notesId, commentId)
-              relation.finalize()
-            }
-            db.close()
-            console.log('Close the database connection.')
-            let notes = arrayNotes.map(note => {
-              note.comments = arrayComments.filter(comment => {
-                if (comment.postId == note.id) {
-                  return comment
-                }
-              })
-              return note
+              return notes
             })
-            return notes
-          })
-          .catch((reject) => {
-            return console.log('Не удалось закрыть или прочитать БД---> ' + reject.message)
-          })
-          .catch(reject => {
-            return console.log('Не удалось соедениться с БД ---> ' + reject.message)
-          })
+        } catch (err) {
+          return console.log('Не удалось закрыть или прочитать БД---> ' + err.message)
+        }
       })
   }
   static async deleteNoteFromDb (id) {
-    return new Promise(resolve => {
-      let data = new sqlite.Database('data.db')
-      resolve(data)
-      console.log('Connected to the "data.db".')
-    })
+    return openDb()
       .then(db => {
         db.all(`DELETE FROM notes WHERE rowid = ${id}`, err => {
           if (err) {
@@ -159,25 +162,9 @@ class Notes {
   }
 
   static testDb () {
-    return new Promise(resolve => {
-      let data = new sqlite.Database('data.db')
-      resolve(data)
-      console.log('Connected to the "data.db" for comments_notes.')
-    })
-      .then(db => {
-        console.log('123')
-        db.all(`SELECT rowid AS id, * FROM notes_comments`, (err, data) => {
-          if (err) {
-            return console.log(err)
-          }
-          console.log(data)
-          return data
-        })
-        db.close()
-        console.log('Close the database connection.')
-      })
-      .catch(reject => {
-        return console.log('Упс! Что-то пошло не так ---> ' + reject.message)
+    openDb()
+      .then(async db => {
+        return console.log(await selectFromTable(db, 'notes_comments'))
       })
   }
 }

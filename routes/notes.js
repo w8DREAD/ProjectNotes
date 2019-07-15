@@ -28,10 +28,11 @@ router.put('/', (req, res, next) => {
 
 })
 
-router.delete('/', (req, res, next) => {
+router.delete('/', async (req, res, next) => {
   let id = req.body.id
-  control.GetNote.deleteNote(id)
-  res.send('ok')
+  await control.GetNote.deleteNote(id)
+  console.log('loading page')
+  res.sendStatus(200)
 })
 
 module.exports = router
