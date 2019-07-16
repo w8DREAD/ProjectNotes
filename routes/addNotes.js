@@ -10,7 +10,7 @@ router.get('/', (req, res, next) => {
 router.post('/', async (req, res, next) => {
   const { tagsText, notesText } = req.body
   await control.GetNote.sendNoteInDb({ tagsText, notesText })
-  res.redirect('/notes')
+  res.redirect('/api/v1/notes')
 })
 
 module.exports = router

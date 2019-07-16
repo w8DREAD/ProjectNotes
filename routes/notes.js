@@ -21,7 +21,7 @@ router.post('/', async (req, res, next) => {
   let id = Object.keys(data)[0]
   let text = req.body[id]
   await control.Comment.sendCommentInDb(id, text)
-  res.redirect('/notes')
+  res.redirect('/api/v1/notes')
 })
 
 router.put('/', (req, res, next) => {
@@ -32,6 +32,7 @@ router.delete('/', async (req, res, next) => {
   let id = req.body.id
   await control.GetNote.deleteNote(id)
   console.log('loading page')
+  // console.log((req.body))
   res.sendStatus(200)
 })
 

@@ -1,11 +1,12 @@
 const handler = require('./model')
 
 class GetNote {
-  constructor (tagsText, notesText, author = 'someBody') {
-    this.tagsText = tagsText
-    this.notesText = notesText
+  constructor (tag, text, author = 'someBody') {
+    this.tag = tag
+    this.text = text
     this.author = author
     this.comments = []
+    this.like = []
   }
   static async forRendering () {
     handler.Notes.testDb()
@@ -21,9 +22,9 @@ class GetNote {
 }
 
 class Comment {
-  constructor (postId = 1, comment, author) {
-    this.postId = +postId
-    this.comment = comment
+  constructor (noteId = 1, text, author) {
+    this.noteId = +noteId
+    this.text = text
     this.author = author
   }
   static async sendCommentInDb (id, text) {

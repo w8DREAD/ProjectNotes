@@ -30,11 +30,11 @@ app
   .use(cookieParser())
   .use(express.static(path.join(__dirname, 'public')))
 
-  .use('/', indexRouter)
-  .use('/notes', notesRouter)
-  .use('/features', featuresRouter)
-  .use('/users', usersRouter)
-  .use('/addNotes', addNotesRouter)
+  .use('/api/v1/', indexRouter)
+  .use('/api/v1/notes', notesRouter)
+  .use('/api/v1/features', featuresRouter)
+  .use('/api/v1/users', usersRouter)
+  .use('/api/v1/addNotes', addNotesRouter)
 
   .use(function (req, res, next) {
     next(createError(404))

@@ -1,17 +1,7 @@
 const sqlite = require('sqlite3').verbose()
 
 const openDb = async () => {
-  return new Promise((resolve, reject) => {
-    let data = new sqlite.Database('data.db', (err, data) => {
-      if (err) {
-        reject(err)
-      } else {
-        return data
-      }
-    })
-    resolve(data)
-    console.log('Connected to the "data.db".')
-  })
+  return new sqlite.Database('data.db')
 }
 
 async function selectFromTable (db, table) {
@@ -21,6 +11,17 @@ async function selectFromTable (db, table) {
         reject(err)
       } else {
         resolve(data)
+      }
+    })
+  })
+}
+async function createTable (db, setupTable, data) {
+  return new Promise((resolve, reject) => {
+    db.run(setupTable, data, err => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve('Ok')
       }
     })
   })
@@ -35,7 +36,7 @@ async function relations () {
           return (err)
         }
       })
-      let noteId = comments[comments.length - 1].postId
+      let noteId = comments[comments.length - 1].noteId
       let commentId = comments.length
       relation.run(commentId, noteId)
       relation.finalize()
@@ -50,43 +51,21 @@ class Notes {
 
   }
 
-  static async pushInNoteDb (notes) {
+  static async pushInNoteDb (note) {
     return openDb()
       .then(db => {
         console.log(db)
         return new Promise((resolve, reject) => {
           db.serialize(() => {
-            db.run('CREATE TABLE IF NOT EXISTS notes (tagsText TEXT, notesText TEXT)', err => {
-              if (err) {
-                reject(err)
-              }
-            })
-            db.run('CREATE TABLE IF NOT EXISTS comments (comment TEXT, author TEXT, postId INTEGER )', err => {
-              if (err) {
-                reject(err)
-              }
-            })
-            db.run('CREATE TABLE IF NOT EXISTS notes_comments (comments_id INTEGER NOT NULL, notes_id INTEGER NOT NULL,' +
-                'FOREIGN KEY (comments_id) REFERENCES comments(id) ON DELETE CASCADE ' +
-                'FOREIGN KEY (notes_id) REFERENCES notes(id) ON DELETE CASCADE )', err => {
-              if (err) {
-                reject(err)
-              }
-            })
-            let pushNote = db.prepare('INSERT INTO notes VALUES (?,?)', err => {
-              if (err) {
-                reject(err)
-              }
-            })
-            pushNote.run(notes.tagsText, notes.notesText)
-            pushNote.finalize()
+            createTable(db, 'CREATE TABLE IF NOT EXISTS notes (tag TEXT NOT NULL, text TEXT NOT NULL, author TEXT NO NULL)')
+            createTable(db, 'CREATE TABLE IF NOT EXISTS comments (text TEXT NOT NULL, author TEXT NOT NULL, noteId INTEGER NOT NULL)')
+              .then(messageOk => {
+                createTable(db, `INSERT INTO notes VALUES (?,?,?)`, [note.tag, note.text, note.author])
+                db.close()
+                return console.log(messageOk)
+              })
           })
-          resolve('Заметка сохранена')
         })
-          .then(messageOk => {
-            db.close()
-            return console.log(messageOk)
-          })
       })
       .catch(reject => {
         return console.log('Заметки: Ошибка работы с БД ---> ' + reject.message)
@@ -97,7 +76,7 @@ class Notes {
     return openDb()
       .then(db => {
         return new Promise((resolve, reject) => {
-          db.run(`INSERT INTO comments VALUES (?,?,?)`, [comment.comment, comment.author, comment.postId], err => {
+          db.run(`INSERT INTO comments VALUES (?,?,?)`, [comment.text, comment.author, comment.noteId], err => {
             if (err) {
               reject(err)
             }
@@ -129,11 +108,10 @@ class Notes {
             .then(([arrayNotes, arrayComments]) => {
               db.close()
               console.log('Close the database connection.')
+              console.log(arrayComments)
               let notes = arrayNotes.map(note => {
                 note.comments = arrayComments.filter(comment => {
-                  if (comment.postId == note.id) {
-                    return comment
-                  }
+                  return comment.noteId == note.id
                 })
                 return note
               })
@@ -152,6 +130,11 @@ class Notes {
             return err
           }
         })
+        db.all(`DELETE FROM comments WHERE postId = ${id}`, err => {
+          if (err) {
+            return err
+          }
+        })
         db.close()
         console.log('Close the database connection.')
         return console.log('Удалено')
@@ -164,7 +147,7 @@ class Notes {
   static testDb () {
     openDb()
       .then(async db => {
-        return console.log(await selectFromTable(db, 'notes_comments'))
+
       })
   }
 }

@@ -5,7 +5,7 @@
         <form class="articles-news" name="news" method="post">
             <div class="notes">
                 <p>
-                    <a href="">{{tagsText}}</a>
+                    <a href="">{{tag}}</a>
                     <button type="submit" class="close button" data-dismiss="alert" aria-label="Close" name="delete">
                     <span aria-hidden="true" id="{{id}}">&times;</span>
                 </button>
@@ -13,7 +13,7 @@
 
             </div>
             <div class="notes" style="margin-bottom: 15px">
-                {{notesText}}
+                {{text}}
                 <button type="submit" class="like" data-dismiss="alert" aria-label="Close" name="like">
                     <span style="color: red">&heartsuit; {{id}}</span>
                 </button>
@@ -25,7 +25,7 @@
         <div class="collapse" id="collapseExample{{id}}">
             {{#comments}}
             <div class="articles-news comments">
-               {{comment}}<br>
+               {{text}}<br>
                 <span aria-hidden="true" style="float: right">{{author}}</span>
             </div>
 
