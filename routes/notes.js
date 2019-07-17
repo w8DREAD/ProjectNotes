@@ -3,6 +3,7 @@ const router = express.Router()
 const bodyParser = require('body-parser')
 const app = express()
 const control = require('../mvc/control')
+const io = require('../bin/www')
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
@@ -21,18 +22,17 @@ router.post('/', async (req, res, next) => {
   let id = Object.keys(data)[0]
   let text = req.body[id]
   await control.Comment.sendCommentInDb(id, text)
-  res.redirect('/api/v1/notes')
+  res.status(200)
 })
 
-router.put('/', (req, res, next) => {
+router.put('/:id', (req, res, next) => {
 
 })
 
-router.delete('/', async (req, res, next) => {
-  let id = req.body.id
+router.delete('/:id', async (req, res, next) => {
+  let id = req.params.id
   await control.GetNote.deleteNote(id)
   console.log('loading page')
-  // console.log((req.body))
   res.sendStatus(200)
 })
 

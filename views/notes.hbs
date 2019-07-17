@@ -2,18 +2,23 @@
 
     {{#notes}}
 
-        <form class="articles-news" name="news" method="post">
+        <form class="articles-news" name="news" method="post" id="post-{{id}}">
             <div class="notes">
                 <p>
                     <a href="">{{tag}}</a>
                     <button type="submit" class="close button" data-dismiss="alert" aria-label="Close" name="delete">
-                    <span aria-hidden="true" id="{{id}}">&times;</span>
-                </button>
+                        <span aria-hidden="true" id="{{id}}">&times;</span>
+                    </button>
+                    <button type="submit" class="like edit button" style="margin-right: 5px" data-dismiss="alert" aria-label="Close" name="delete">
+                        <span aria-hidden="true" id="{{id}}">✎</span>
+                    </button>
                 </p>
 
             </div>
-            <div class="notes" style="margin-bottom: 15px">
-                {{text}}
+            <div class="notes" style="margin-bottom: 15px" id="note-{{id}}">
+                <p>
+                    {{text}}
+                </p>
                 <button type="submit" class="like" data-dismiss="alert" aria-label="Close" name="like">
                     <span style="color: red">&heartsuit; {{id}}</span>
                 </button>

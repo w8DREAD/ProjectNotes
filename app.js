@@ -13,6 +13,17 @@ const addNotesRouter = require('./routes/addNotes')
 
 const app = express()
 
+const server = require('./bin/www')
+const io = require('socket.io')(server)
+
+io.sockets.on('connection', function (socket) {
+  socket.send('ads')
+  console.log('notes.js')
+  socket.on('message', data => {
+    console.log(data)
+  })
+})
+
 app.engine('.hbs', exphbs({
   defaultLayout: 'layout',
   extname: '.hbs',

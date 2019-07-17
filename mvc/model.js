@@ -4,9 +4,9 @@ const openDb = async () => {
   return new sqlite.Database('data.db')
 }
 
-async function selectFromTable (db, table) {
+async function selectFromTable (db, setupTable) {
   return new Promise((resolve, reject) => {
-    db.all(`SELECT rowid AS id, * FROM ${table}`, (err, data) => {
+    db.all(setupTable, (err, data) => {
       if (err) {
         reject(err)
       } else {
@@ -30,7 +30,7 @@ async function createTable (db, setupTable, data) {
 async function relations () {
   openDb()
     .then(async db => {
-      let comments = await selectFromTable(db, 'comments')
+      let comments = await selectFromTable(db, 'SELECT rowid AS id, * FROM comments')
       let relation = db.prepare('INSERT INTO notes_comments VALUES (?,?)', err => {
         if (err) {
           return (err)
@@ -62,7 +62,7 @@ class Notes {
               .then(messageOk => {
                 createTable(db, `INSERT INTO notes VALUES (?,?,?)`, [note.tag, note.text, note.author])
                 db.close()
-                return console.log(messageOk)
+                resolve(console.log('Push note in Db - ' + messageOk))
               })
           })
         })
@@ -76,20 +76,8 @@ class Notes {
     return openDb()
       .then(db => {
         return new Promise((resolve, reject) => {
-          db.run(`INSERT INTO comments VALUES (?,?,?)`, [comment.text, comment.author, comment.noteId], err => {
-            if (err) {
-              reject(err)
-            }
-            resolve('Complete')
-          })
+          resolve(createTable(db, `INSERT INTO comments VALUES (?,?,?)`, [comment.text, comment.author, comment.noteId]))
         })
-          .then(() => {
-            db.close()
-            console.log('Close the database connection.')
-            return relations()
-          })
-        // pushComment.run(comment.comment, comment.author, comment.postId)
-        // pushComment.finalize()
       })
       .catch(reject => {
         return console.log('Комментарии: Ошибка работы с БД ---> ' + reject.message)
@@ -101,46 +89,34 @@ class Notes {
     let arrayComments
     return openDb()
       .then(async db => {
-        try {
-          arrayNotes = await selectFromTable(db, 'notes')
-          arrayComments = await selectFromTable(db, 'comments')
-          return Promise.all([arrayNotes, arrayComments])
-            .then(([arrayNotes, arrayComments]) => {
-              db.close()
-              console.log('Close the database connection.')
-              console.log(arrayComments)
-              let notes = arrayNotes.map(note => {
-                note.comments = arrayComments.filter(comment => {
-                  return comment.noteId == note.id
-                })
-                return note
-              })
-              return notes
-            })
-        } catch (err) {
-          return console.log('Не удалось закрыть или прочитать БД---> ' + err.message)
-        }
+        arrayNotes = await selectFromTable(db, 'SELECT rowid AS id, * FROM notes')
+        arrayComments = await selectFromTable(db, 'SELECT rowid AS id, * FROM comments')
+        db.close()
+        console.log('Close the database connection.')
+        console.log(arrayComments)
+        let notes = arrayNotes.map(note => {
+          note.comments = arrayComments.filter(comment => {
+            return comment.noteId == note.id
+          })
+          return note
+        })
+        return notes
+      })
+      .catch((err) => {
+        return console.log('Не удалось закрыть или прочитать БД---> ' + err.message)
       })
   }
   static async deleteNoteFromDb (id) {
     return openDb()
       .then(db => {
-        db.all(`DELETE FROM notes WHERE rowid = ${id}`, err => {
-          if (err) {
-            return err
-          }
-        })
-        db.all(`DELETE FROM comments WHERE postId = ${id}`, err => {
-          if (err) {
-            return err
-          }
-        })
+        selectFromTable(db, `DELETE FROM notes WHERE rowid = ${id}`)
+        selectFromTable(db, `DELETE FROM comments WHERE noteId = ${id}`)
         db.close()
         console.log('Close the database connection.')
         return console.log('Удалено')
       })
-      .catch(reject => {
-        return console.log('Упс! Что-то пошло не так ---> ' + reject.message)
+      .catch(err => {
+        return console.log('Упс! Что-то пошло не так ---> ' + err.message)
       })
   }
 
