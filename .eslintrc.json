@@ -1,17 +1,47 @@
 {
+  "parserOptions": {
+    "ecmaVersion": 7,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "globals": {
+    "CIQ": true,
+    "$$$": true,
+    "$$": true,
+    "html2canvas": true
+  },
+  "extends": ["airbnb"],
+  "rules": {
+    "react/sort-comp": [0],
+    "object-curly-spacing": 0,
+    "no-useless-escape": 2,
+    "no-console": [
+      "off",
+      {
+        "allow": ["warn", "error"]
+      }
+    ],
+    "import/no-extraneous-dependencies": "off",
+    "import/no-unresolved": "off",
+    "import/extensions": "off",
+    "react/no-danger": "off",
+    "react/no-children-prop": "off",
+    "react/jsx-filename-extension": [
+      1,
+      {
+        "extensions": [".js", ".jsx"]
+      }
+    ],
+    "jsx-a11y/href-no-hash": "off",
+    "jsx-a11y/click-events-have-key-events": "off",
+    "react/jsx-closing-tag-location": 0,
+    "no-use-before-define": "off"
+  },
   "env": {
     "browser": true,
-    "commonjs": true,
-    "es6": true
+    "node": true
   },
-  "extends": "standard",
-  "globals": {
-    "Atomics": "readonly",
-    "SharedArrayBuffer": "readonly"
-  },
-  "parserOptions": {
-    "ecmaVersion": 2018
-  },
-  "rules": {
-  }
+  "plugins": ["react", "jsx-a11y", "import"]
 }

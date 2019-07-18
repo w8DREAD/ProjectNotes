@@ -1,36 +1,43 @@
-const handler = require('./model')
+const handler = require('./model');
 
-class GetNote {
-  constructor (tag, text, author = 'someBody') {
-    this.tag = tag
-    this.text = text
-    this.author = author
-    this.comments = []
-    this.like = []
+class Note {
+  constructor(tag, text, author = 'someBody') {
+    this.tag = tag;
+    this.text = text;
+    this.author = author;
+    this.comments = [];
+    this.like = [];
   }
-  static async forRendering () {
-    handler.Notes.testDb()
-    return handler.Notes.renderFromDb()
+
+  static async forRendering() {
+    return handler.Notes.renderFromDb();
   }
-  static async sendNoteInDb ({ tagsText, notesText }) {
-    let notes = new GetNote(tagsText, notesText)
-    return handler.Notes.pushInNoteDb(notes)
+
+  static async create({ tagsText, notesText }) {
+    const notes = new Note(tagsText, notesText);
+    return handler.Notes.pushInDb(notes);
   }
-  static async deleteNote (id) {
-    return handler.Notes.deleteNoteFromDb(id)
+
+  static async delete(id) {
+    return handler.Notes.deleteFromDb(id);
+  }
+
+  static async edit(text, id) {
+    return handler.Notes.editInDb(text, id);
   }
 }
 
 class Comment {
-  constructor (noteId = 1, text, author) {
-    this.noteId = +noteId
-    this.text = text
-    this.author = author
+  constructor(noteId = 1, text, author) {
+    this.noteId = +noteId;
+    this.text = text;
+    this.author = author;
   }
-  static async sendCommentInDb (id, text) {
-    let comment = new Comment(id, text, 'author')
-    return handler.Notes.pushInCommentDb(comment)
+
+  static async create(id, text) {
+    const comment = new Comment(id, text, 'author');
+    return handler.Comment.pushInDb(comment);
   }
 }
 
-module.exports = { GetNote, Comment }
+module.exports = { Note, Comment };
