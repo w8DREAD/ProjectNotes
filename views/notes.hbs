@@ -6,22 +6,17 @@
             <div class="notes">
                 <p>
                     <a href="">{{tag}}</a>
-                    <button type="submit" class="close button" data-dismiss="alert" aria-label="Close" name="delete">
-                        <span aria-hidden="true" id="{{id}}">&times;</span>
+                    <button type="submit" class="close button" data-dismiss="alert" aria-label="Close" name={{id}}>
+                        <span aria-hidden="true" id="delete-{{id}}">&times;</span>
                     </button>
-                    <button type="submit" class="like edit button" style="margin-right: 5px" data-dismiss="alert" aria-label="Close" name="delete">
-                        <span aria-hidden="true" id="{{id}}">✎</span>
+                    <button type="submit" class="like edit button" style="margin-right: 5px" data-dismiss="alert" aria-label="Close" name={{id}}>
+                        <span aria-hidden="true" id="edit-{{id}}">✎</span>
                     </button>
                 </p>
 
             </div>
             <div class="notes" style="margin-bottom: 15px" id="note-{{id}}">
-                <p>
                     {{text}}
-                </p>
-                <button type="submit" class="like" data-dismiss="alert" aria-label="Close" name="like">
-                    <span style="color: red">&heartsuit; {{id}}</span>
-                </button>
             </div>
 
 
@@ -38,15 +33,20 @@
 
             <div class="input-group add-notes">
                 <div class="input-group-prepend">
-                    <button class="input-group-text" type="submit">Добавить</button>
+                    <button class="input-group-text" type="submit" form="add-{{id}}">Добавить</button>
                 </div>
-                <input type="tags" class="form-control" id="inputComment1" placeholder="напиши комментарий" name="{{id}}">
+                <div type="tags" class="form-control" id="inputComment1" placeholder="напиши комментарий" name="add-{{id}}" contenteditable="true"></div>
             </div>
         </div>
+            <div style="margin-top: 5px">
+                <button type="submit" class="like" data-dismiss="alert" aria-label="Close" name="like">
+                    <span style="color: red">&heartsuit; {{id}}</span>
+                </button>
             <a data-toggle="collapse" href="#collapseExample{{id}}" role="button" aria-expanded="false"
                aria-controls="collapseExample{{id}}" style="font-size: 14px; float: right; padding-top: 10px; margin-right: 15px">
                 комментарии
             </a>
+            </div>
         </form>
     {{/notes}}
 
