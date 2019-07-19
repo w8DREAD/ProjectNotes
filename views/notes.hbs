@@ -2,7 +2,7 @@
 
     {{#notes}}
 
-        <form class="articles-news" name="news" method="post" id="post-{{id}}">
+        <form class="articles-news" name="news" id="post-{{id}}">
             <div class="notes">
                 <p>
                     <a href="">{{tag}}</a>
@@ -18,11 +18,14 @@
             <div class="notes" style="margin-bottom: 15px" id="note-{{id}}">
                     {{text}}
             </div>
+            <div class="notes" style="margin-bottom: 15px" id="info-note-{{id}}">
+                Автор: {{author}} <br> Опубликовано: {{date}}
+            </div>
 
 
 
 
-        <div class="collapse" id="collapseExample{{id}}">
+        <div class="collapse" id="collapseExample-{{id}}">
             {{#comments}}
             <div class="articles-news comments">
                {{text}}<br>
@@ -31,19 +34,17 @@
 
             {{/comments}}
 
-            <div class="input-group add-notes">
+            <div class="input-group add-notes" id="add-notes-{{id}}">
                 <div class="input-group-prepend">
-                    <button class="input-group-text" type="submit" form="add-{{id}}">Добавить</button>
+                    <button class="input-group-text" type="button" name="{{id}}">Добавить</button>
                 </div>
-                <div type="tags" class="form-control" id="inputComment1" placeholder="напиши комментарий" name="add-{{id}}" contenteditable="true"></div>
+                <div type="tags" class="form-control" id="inputComment-{{id}}" placeholder="напиши комментарий" contenteditable="true"></div>
             </div>
         </div>
             <div style="margin-top: 5px">
-                <button type="submit" class="like" data-dismiss="alert" aria-label="Close" name="like">
-                    <span style="color: red">&heartsuit; {{id}}</span>
-                </button>
-            <a data-toggle="collapse" href="#collapseExample{{id}}" role="button" aria-expanded="false"
-               aria-controls="collapseExample{{id}}" style="font-size: 14px; float: right; padding-top: 10px; margin-right: 15px">
+                    <span class="like" type="button" style="color: red">&heartsuit; <p style="float: right; margin-left: 5px" name={{id}}>1</p></span>
+            <a data-toggle="collapse" href="#collapseExample-{{id}}" role="button" aria-expanded="false"
+               aria-controls="collapseExample-{{id}}" style="font-size: 14px; float: right; padding-top: 10px; margin-right: 15px">
                 комментарии
             </a>
             </div>

@@ -11,18 +11,17 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 router.get('/', async (req, res, next) => {
-  console.log('loading page');
-  const data = await control.Note.forRendering() || [];
+  const notes = await control.Note.render() || [];
+  console.log(notes)
   res.render('notes', {
     news: 'Тут будут новости',
     addClassNews: 'active',
-    notes: data.reverse(),
+    notes: notes.reverse(),
   });
 });
 router.post('/', async (req, res, next) => {
-  const data = req.body;
-  const id = Object.keys(data)[0];
-  const text = req.body[id];
+  const text = req.body.text;
+  const id = req.body.id
   await control.Comment.create(id, text);
   res.status(200);
 });
