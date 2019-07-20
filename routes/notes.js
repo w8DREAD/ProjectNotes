@@ -26,6 +26,15 @@ router.post('/', async (req, res, next) => {
   res.status(200);
 });
 
+router.post('/like', async (req, res, next) => {
+  const text = req.body.text;
+  const id = req.body.id
+  const data = req.body
+  console.log(data)
+  // await control.Comment.create(id, text);
+  res.status(200);
+});
+
 router.put('/:id', async (req, res, next) => {
   const text = req.body.noteText;
   const id = req.params.id;

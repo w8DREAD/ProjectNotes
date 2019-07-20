@@ -1,7 +1,7 @@
-function xhr(method, url, dataSend, value) {
+function xhr(method, url, dataSend, dataForm) {
   const XHR = new XMLHttpRequest();
   XHR.open(method, url, true);
-  XHR.setRequestHeader('Content-type', value || 'application/x-www-form-urlencoded');
+  XHR.setRequestHeader('Content-type', dataForm || 'application/x-www-form-urlencoded');
 
   XHR.send(dataSend);
 }
@@ -9,7 +9,7 @@ function xhr(method, url, dataSend, value) {
 
 window.addEventListener('click', (target) => {
   const author = 'Vasiliy';
-  const targetClassName = target.target.parentNode.className;
+  const targetClassName = target.target.className;
   let idForDb;
   if (target.target.attributes.name) {
     idForDb = target.target.attributes.name.value;
@@ -74,5 +74,9 @@ window.addEventListener('click', (target) => {
             </div>`);
     enterField.innerText = '';
   }
-  return 'Ok';
+  if (target.target.className === 'like') {
+    xhr('post', 'notes/like', '123');
+  }
+
+
 });
