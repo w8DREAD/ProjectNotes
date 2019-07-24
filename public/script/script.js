@@ -135,4 +135,3 @@ window.addEventListener('click', (target) => {
       .catch(err => err);
   }
 });
-1

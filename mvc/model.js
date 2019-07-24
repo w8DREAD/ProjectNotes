@@ -153,4 +153,3 @@ class Likes {
   }
 }
 module.exports = { Notes, Comments, Likes };
-1

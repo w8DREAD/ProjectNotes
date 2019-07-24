@@ -101,4 +101,3 @@ class Like {
 module.exports = {
   Note, Comment, Like, User,
 };
-1
