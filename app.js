@@ -10,6 +10,7 @@ const usersRouter = require('./routes/users');
 const notesRouter = require('./routes/notes');
 const featuresRouter = require('./routes/features');
 const addNotesRouter = require('./routes/addNotes');
+const logsRouter = require('./routes/logs');
 
 const app = express();
 
@@ -46,6 +47,7 @@ app
   .use('/api/v1/features', featuresRouter)
   .use('/api/v1/users', usersRouter)
   .use('/api/v1/addNotes', addNotesRouter)
+  .use('/logs', logsRouter)
 
   .use((req, res, next) => {
     next(createError(404));
