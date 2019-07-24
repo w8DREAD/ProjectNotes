@@ -151,5 +151,15 @@ class Likes {
       })
       .catch(err => console.log(`Не удалось закрыть или прочитать БД---> ${err.message}`));
   }
+
+  static deleteFromDb(id) {
+    return openDb()
+      .then((db) => {
+        selectFromTable(db, `DELETE FROM likes WHERE noteId = ${id}`);
+        closeDb(db);
+        return console.log('Удалено');
+      })
+      .catch(err => console.log(`Упс! Что-то пошло не так ---> ${err.message}`));
+  }
 }
 module.exports = { Notes, Comments, Likes };

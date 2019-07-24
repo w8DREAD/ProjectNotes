@@ -57,6 +57,7 @@ class Note {
   }
 
   static delete(id) {
+    handler.Likes.deleteFromDb(id)
     handler.Comments.deleteFromDb(id);
     handler.Notes.deleteFromDb(id);
   }
