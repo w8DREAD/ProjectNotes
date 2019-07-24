@@ -35,26 +35,24 @@ class Note {
     this.text = text;
     this.author = author;
     this.date = formatDate();
-    this.usersLike = [author]
-  }
-
-  static pressLike(id, user) {
-    if(this.usersLike.includes(user)) {
-
-    }
+    this.likes = 0
   }
 
   static async render() {
-   let notes = await handler.Notes.takeFromDb();
+    let notes = await handler.Notes.takeFromDb();
     let comments = await handler.Comments.takeFromDb();
-      return notes.map(note => {
-        note.comments = comments.filter(comment => comment.noteId === note.id)
-        return note
-      })
+    let likes = await handler.Likes.takeFromDb();
+    return notes.map(note => {
+      let noteLikes = likes.filter(like => +like.noteId === note.id)
+      console.log(noteLikes)
+      note.likes = noteLikes.length
+      note.comments = comments.filter(comment => comment.noteId === note.id)
+      return note
+    })
   }
 
   static create({ tagsText, notesText }) {
-    const notes = new Note(tagsText, notesText);
+    const notes = new Note(tagsText, notesText );
     return handler.Notes.pushInDb(notes);
   }
 
@@ -82,18 +80,24 @@ class Comment {
 }
 
 class Like {
-  constructor(noteId) {
+  constructor(noteId, author) {
     this.noteId = noteId;
-    this.current = 0
-    this.usersLikes = [];
+    this.author = author;
   }
-  static pressLike(user) {
-    if(!this.usersLikes.includes(user)) {
-
+  static async create({ noteId, author }) {
+    const like = new Like( noteId, author);
+    if(await this.check(like)) {
+      await handler.Likes.pushInDb(like)
+      return true
+    } else {
+      return false
     }
+
+  }
+  static check(like) {
+    return handler.Likes.checkInDb(like)
   }
 }
-
 module.exports = {
   Note, Comment, Like, User,
 };

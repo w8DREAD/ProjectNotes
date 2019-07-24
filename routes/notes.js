@@ -12,7 +12,6 @@ app.use(bodyParser.json());
 
 router.get('/', async (req, res, next) => {
   const notes = await control.Note.render() || [];
-  console.log(notes)
   res.render('notes', {
     news: 'Тут будут новости',
     addClassNews: 'active',
@@ -24,6 +23,15 @@ router.post('/', async (req, res, next) => {
   const id = req.body.id
   await control.Comment.create(id, text);
   res.status(200);
+});
+
+router.post('/like', async (req, res, next) => {
+  const {noteId, author} = req.body
+  if (await control.Like.create({noteId, author})) {
+    res.status(200).json({status: true})
+  } else {
+    res.status(200).json({status: false})
+  }
 });
 
 router.put('/:id', async (req, res, next) => {

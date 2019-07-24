@@ -1,38 +1,38 @@
-const createError = require('http-errors')
-const express = require('express')
-const path = require('path')
-const cookieParser = require('cookie-parser')
-const logger = require('morgan')
-const exphbs = require('express-handlebars')
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+const exphbs = require('express-handlebars');
 
-const indexRouter = require('./routes/index')
-const usersRouter = require('./routes/users')
-const notesRouter = require('./routes/notes')
-const featuresRouter = require('./routes/features')
-const addNotesRouter = require('./routes/addNotes')
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const notesRouter = require('./routes/notes');
+const featuresRouter = require('./routes/features');
+const addNotesRouter = require('./routes/addNotes');
 
-const app = express()
+const app = express();
 
-const server = require('./bin/www')
-const io = require('socket.io')(server)
+const server = require('./bin/www');
+const io = require('socket.io')(server);
 
-io.sockets.on('connection', function (socket) {
-  socket.send('ads')
-  console.log('notes.js')
-  socket.on('message', data => {
-    console.log(data)
-  })
-})
+io.sockets.on('connection', (socket) => {
+  socket.send('ads');
+  console.log('notes.js');
+  socket.on('message', (data) => {
+    console.log(data);
+  });
+});
 
 app.engine('.hbs', exphbs({
   defaultLayout: 'layout',
   extname: '.hbs',
-  layoutsDir: path.join(__dirname + '/views'),
-  partialsDir: path.join(__dirname + '/partials')
-}))
+  layoutsDir: path.join(`${__dirname}/views`),
+  partialsDir: path.join(`${__dirname}/partials`),
+}));
 
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'hbs')
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hbs');
 
 app
   .use(logger('dev'))
@@ -47,14 +47,14 @@ app
   .use('/api/v1/users', usersRouter)
   .use('/api/v1/addNotes', addNotesRouter)
 
-  .use(function (req, res, next) {
-    next(createError(404))
+  .use((req, res, next) => {
+    next(createError(404));
   })
-  .use(function (err, req, res, next) {
-    res.locals.message = err.message
-    res.locals.error = req.app.get('env') === 'development' ? err : {}
-    res.status(err.status || 500)
-    res.render('error')
-  })
+  .use((err, req, res, next) => {
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
+    res.status(err.status || 500);
+    res.render('error');
+  });
 
-module.exports = app
+module.exports = app;
