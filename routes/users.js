@@ -1,13 +1,18 @@
-var express = require('express')
-var router = express.Router()
+const express = require('express');
 
-router.get('/', function (req, res, next) {
-  res.send('respond with a resource')
-})
+const router = express.Router();
+
+router.get('/registr', (req, res, next) => {
+  res.render('registr');
+});
+
+router.get('/login', (req, res, next) => {
+  res.render('login');
+});
 
 router.post('/', (req, res) => {
-  console.log(req.body)
-  res.send('post')
-})
+  console.log(req.body);
+  res.send('post');
+});
 
-module.exports = router
+module.exports = router;

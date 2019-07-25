@@ -4,6 +4,9 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const exphbs = require('express-handlebars');
+const passport = require('passport');
+const session = require('express-session');
+const SessionStore = require('session-file-store')(session);
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -13,17 +16,6 @@ const addNotesRouter = require('./routes/addNotes');
 const logsRouter = require('./routes/logs');
 
 const app = express();
-
-const server = require('./bin/www');
-const io = require('socket.io')(server);
-
-io.sockets.on('connection', (socket) => {
-  socket.send('ads');
-  console.log('notes.js');
-  socket.on('message', (data) => {
-    console.log(data);
-  });
-});
 
 app.engine('.hbs', exphbs({
   defaultLayout: 'layout',
@@ -41,6 +33,19 @@ app
   .use(express.urlencoded({ extended: false }))
   .use(cookieParser())
   .use(express.static(path.join(__dirname, 'public')))
+  .use(session({
+    secret: 'secretword',
+    store: new SessionStore(),
+    cookie: {
+      path: '/',
+      httpOnly: true,
+      maxAge: 1000 * 60 * 30,
+    },
+    resave: false,
+    saveUninitialized: false,
+  }))
+  .use(passport.initialize())
+  .use(passport.session())
 
   .use('/api/v1/', indexRouter)
   .use('/api/v1/notes', notesRouter)
