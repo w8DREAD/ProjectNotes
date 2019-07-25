@@ -1,11 +1,11 @@
 
-const socket = io.connect('http://localhost:3000');
-socket.on('send', (data) => {
-  if(window.location.pathname == '/logs') {
+if (window.location.pathname === '/logs') {
+  const socket = io.connect('http://localhost:3000');
+  socket.on('send', (data) => {
     const main = document.querySelector('div.content');
     main.insertAdjacentHTML('afterbegin', `<p style="margin: 5px 0 0 65px">${data}</p>`);
-  }
-});
+  });
+}
 
 
 function xhr(method, url, dataSend, value) {
