@@ -7,8 +7,9 @@ openDb()
   .then((db) => {
     db.serialize(() => {
       workWithTable(db, 'CREATE TABLE IF NOT EXISTS comments (text TEXT NOT NULL, author TEXT NOT NULL, noteId INTEGER NOT NULL)');
-      workWithTable(db, 'CREATE TABLE IF NOT EXISTS notes (tag TEXT NOT NULL, text TEXT NOT NULL, author TEXT NO NULL, date TEXT NO NULL)');
+      workWithTable(db, 'CREATE TABLE IF NOT EXISTS notes (tag TEXT NOT NULL, text TEXT NOT NULL, author TEXT NO NULL, date TEXT NO NULL, userId INTEGER NOT NULL)');
       workWithTable(db, 'CREATE TABLE IF NOT EXISTS likes (noteId TEXT NOT NULL, author TEXT NO NULL)');
+      workWithTable(db, 'CREATE TABLE IF NOT EXISTS users (username TEXT NOT NULL, password TEXT NOT NULL, email TEXT NO NULL, telephone INTEGER NOT NULL, date TEXT NO NULL)');
       closeDb(db);
     });
   });
@@ -46,7 +47,7 @@ class Notes {
   static pushInDb(note) {
     return openDb()
       .then((db) => {
-        workWithTable(db, 'INSERT INTO notes VALUES (?,?,?,?)', [note.tag, note.text, note.author, note.date]);
+        workWithTable(db, 'INSERT INTO notes VALUES (?,?,?,?,?)', [note.tag, note.text, note.author, note.date, note.userId]);
         closeDb(db);
         return true;
       })
@@ -162,4 +163,28 @@ class Likes {
       .catch(err => console.log(`Упс! Что-то пошло не так ---> ${err.message}`));
   }
 }
-module.exports = { Notes, Comments, Likes };
+
+class User {
+  static pushInDb(user) {
+    return openDb()
+      .then((db) => {
+        workWithTable(db, 'INSERT INTO users VALUES (?,?,?,?,?)', [user.username, user.password, user.email, user.telephone, user.dateBirthday]);
+        closeDb(db);
+        return console.log('User registered');
+      })
+      .catch(reject => console.log(`Комментарии: Ошибка работы с БД ---> ${reject.message}`));
+  }
+
+  static takeFromDb() {
+    return openDb()
+      .then((db) => {
+        const result = selectFromTable(db, 'SELECT rowid AS id, * FROM users');
+        closeDb(db);
+        return result;
+      })
+      .catch(err => console.log(`Не удалось закрыть или прочитать БД---> ${err.message}`));
+  }
+}
+module.exports = {
+  Notes, Comments, Likes, User,
+};

@@ -21,16 +21,22 @@ function formatDate() {
 }
 
 class User {
-  constructor(name, dateBirthday, email, telephone) {
+  constructor(name, password, email, telephone, dateBirthday) {
     this.name = name;
-    this.dateBirthday = dateBirthday;
+    this.password = password
     this.email = email;
     this.telephone = telephone;
+    this.dateBirthday = dateBirthday;
+  }
+
+  static create(name, password, email, telephone, dateBirthday) {
+
   }
 }
 
 class Note {
-  constructor(tag, text, author = 'someBody') {
+  constructor(tag, text, author = 'someBody', userId) {
+    this.userId = userId
     this.tag = tag;
     this.text = text;
     this.author = author;
