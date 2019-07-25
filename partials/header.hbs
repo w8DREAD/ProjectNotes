@@ -1,11 +1,15 @@
 
 <form style="width: 100%" name="description">
     <h3 style="margin: 15px 0 0 50px">Храните ваши заметки у нас. Легко и просто.</h3>
+    <div class="register-form">
+        <a  href="/api/v1/users/login">войти</a>/<a href="/api/v1/users/register">регистрация</a>
+    </div>
 </form>
 <form aria-label>
     <ul class="pagination pagination-lg" style="margin-left: 50px">
         <li class="page-item"><a class="page-link {{addClassMain}}" href="/api/v1/">Главная</a></li>
         <li class="page-item"><a class="page-link {{addClassNews}}" href="/api/v1/notes">Новости</a></li>
         <li class="page-item"><a class="page-link {{addClassFeatures}}" href="/api/v1/features">Фичи</a></li>
+        <li class="page-item"><a class="page-link {{addClassLogs}}" href="/logs">Логи</a></li>
     </ul>
 </form>

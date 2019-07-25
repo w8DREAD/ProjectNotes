@@ -22,15 +22,17 @@ function formatDate() {
 
 class User {
   constructor(name, password, email, telephone, dateBirthday) {
-    this.name = name;
+    this.username = name;
     this.password = password
     this.email = email;
     this.telephone = telephone;
     this.dateBirthday = dateBirthday;
   }
 
-  static create(name, password, email, telephone, dateBirthday) {
-
+  static create(user) {
+    const newUser = new User(user.username, user.password, user.email, user.telephone, user.dateBirthday);
+    handler.Users.takeFromDb();
+    return handler.Users.pushInDb(newUser)
   }
 }
 
@@ -56,7 +58,6 @@ class Note {
       return note
     })
   }
-
   static create({ tagsText, notesText }) {
     const notes = new Note(tagsText, notesText );
     return handler.Notes.pushInDb(notes);

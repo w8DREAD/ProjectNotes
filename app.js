@@ -27,6 +27,8 @@ app.engine('.hbs', exphbs({
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
+require('./auth')._passport(app);
+
 app
   .use(logger('dev'))
   .use(express.json())

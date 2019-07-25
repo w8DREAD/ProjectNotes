@@ -1,11 +1,8 @@
 const express = require('express');
-
 const router = express.Router();
 const bodyParser = require('body-parser');
-
 const app = express();
 const control = require('../mvc/control');
-const io = require('../bin/www');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());

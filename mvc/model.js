@@ -9,7 +9,7 @@ openDb()
       workWithTable(db, 'CREATE TABLE IF NOT EXISTS comments (text TEXT NOT NULL, author TEXT NOT NULL, noteId INTEGER NOT NULL)');
       workWithTable(db, 'CREATE TABLE IF NOT EXISTS notes (tag TEXT NOT NULL, text TEXT NOT NULL, author TEXT NO NULL, date TEXT NO NULL, userId INTEGER NOT NULL)');
       workWithTable(db, 'CREATE TABLE IF NOT EXISTS likes (noteId TEXT NOT NULL, author TEXT NO NULL)');
-      workWithTable(db, 'CREATE TABLE IF NOT EXISTS users (username TEXT NOT NULL, password TEXT NOT NULL, email TEXT NO NULL, telephone INTEGER NOT NULL, date TEXT NO NULL)');
+      workWithTable(db, 'CREATE TABLE IF NOT EXISTS users (username TEXT NOT NULL, password TEXT NOT NULL, email TEXT NO NULL, telephone INTEGER NOT NULL, date TEXT)');
       closeDb(db);
     });
   });
@@ -164,7 +164,7 @@ class Likes {
   }
 }
 
-class User {
+class Users {
   static pushInDb(user) {
     return openDb()
       .then((db) => {
@@ -186,5 +186,5 @@ class User {
   }
 }
 module.exports = {
-  Notes, Comments, Likes, User,
+  Notes, Comments, Likes, Users,
 };
