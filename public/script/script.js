@@ -1,3 +1,13 @@
+
+const socket = io.connect('http://localhost:3000');
+socket.on('send', (data) => {
+  if(window.location.pathname == '/logs') {
+    const main = document.querySelector('div.content');
+    main.insertAdjacentHTML('afterbegin', `<p style="margin: 5px 0 0 65px">${data}</p>`);
+  }
+});
+
+
 function xhr(method, url, dataSend, value) {
   return new Promise((resolve, reject) => {
     const XHR = new XMLHttpRequest();

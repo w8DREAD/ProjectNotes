@@ -4,10 +4,7 @@ const router = express.Router();
 const control = require('../mvc/control');
 
 router.get('/', (req, res, next) => {
-  res.render('features', {
-    features: 'Тут будут фичи',
-    addClassFeatures: 'active',
-  });
+  res.render('logs');
 });
 
 module.exports = router;
