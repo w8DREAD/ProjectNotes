@@ -1,11 +1,20 @@
 
 <form style="width: 100%" name="description">
     <h3 style="margin: 15px 0 0 50px">Храните ваши заметки у нас. Легко и просто.</h3>
-    <div class="register-form">
-        <a  href="/api/v1/users/login">войти</a>/<a href="/api/v1/users/register">регистрация</a>
-    </div>
+
 </form>
 <form aria-label>
+    <div class="register-form">
+        {{#if login}}
+                <h3>Hey, {{username}}!</h3>
+            <a href="/api/v1/users/logout" class="badge badge-primary" style="font-size: large">Logout</a>
+        {{else}}
+
+            <a href="/api/v1/users/login" class="badge badge-primary" style="font-size: large">войти</a> |
+            <a href="/api/v1/users/register" class="badge badge-primary" style="font-size: large">регистрация</a>
+        {{/if}}
+
+    </div>
     <ul class="pagination pagination-lg" style="margin-left: 50px">
         <li class="page-item"><a class="page-link {{addClassMain}}" href="/api/v1/">Главная</a></li>
         <li class="page-item"><a class="page-link {{addClassNews}}" href="/api/v1/notes">Новости</a></li>

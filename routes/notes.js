@@ -3,13 +3,15 @@ const router = express.Router();
 const bodyParser = require('body-parser');
 const app = express();
 const control = require('../mvc/control');
+const middleware = require('../auth/middleware')
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
-router.get('/', async (req, res, next) => {
+router.get('/', middleware(), async (req, res, next) => {
   const notes = await control.Note.render() || [];
   res.render('notes', {
+    username: req.user.username,
+    login: true,
     news: 'Тут будут новости',
     addClassNews: 'active',
     notes: notes.reverse(),
@@ -18,8 +20,9 @@ router.get('/', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
   const text = req.body.text;
   const id = req.body.id
-  await control.Comment.create(id, text);
-  res.status(200);
+  const author = req.user.username;
+  await control.Comment.create(id, text, author);
+  res.status(200).json({author: req.user.username});
 });
 
 router.post('/like', async (req, res, next) => {
@@ -37,7 +40,6 @@ router.put('/:id', async (req, res, next) => {
   await control.Note.edit(text, id);
   res.status(200);
 });
-
 router.delete('/:id', async (req, res, next) => {
   const id = req.params.id;
   await control.Note.delete(id);

@@ -30,14 +30,7 @@ function xhr(method, url, dataSend, value) {
       });
     };
     XHR.send(dataSend);
-  })
-    .then((res) => {
-      if (JSON.parse(res).status) {
-        return 1;
-      }
-      return -1;
-    })
-    .catch(err => console.log(err));
+  });
 }
 
 // удалить заметку
@@ -100,7 +93,6 @@ window.addEventListener('click', (target) => {
 
 // добавить комментарий
 window.addEventListener('click', (target) => {
-  const author = 'Vasiliy';
   const targetClassName = target.target.parentNode.className;
   let idForDb;
   if (target.target.attributes.name) {
@@ -114,12 +106,16 @@ window.addEventListener('click', (target) => {
       id: idForDb,
       text: textInner,
     });
-    xhr('post', '/api/v1/notes', json, 'application/json');
-    containerForComments.insertAdjacentHTML('beforebegin', `<div class="articles-news comments">
+    xhr('post', '/api/v1/notes', json, 'application/json')
+      .then((res) => {
+        const {author} = JSON.parse(res);
+        containerForComments.insertAdjacentHTML('beforebegin', `<div class="articles-news comments">
                ${textInner}<br>
                 <span aria-hidden="true" style="float: right">${author}</span>
             </div>`);
-    enterField.innerText = '';
+        enterField.innerText = '';
+        return true;
+      });
   }
 });
 
@@ -137,6 +133,12 @@ window.addEventListener('click', (target) => {
       author,
     });
     xhr('post', '/api/v1/notes/like', json, 'application/json')
+      .then((res) => {
+        if (JSON.parse(res).status) {
+          return 1;
+        }
+        return -1;
+      })
       .then((like) => {
         const currentLikes = document.querySelector(`span.like > p[name="${idForDb}"]`);
         currentLikes.innerText = (+currentLikes.innerText + like);

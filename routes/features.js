@@ -1,4 +1,5 @@
 const express = require('express');
+const middleware = require('../auth/middleware');
 
 const router = express.Router();
 const bodyParser = require('body-parser');
@@ -7,8 +8,11 @@ const app = express();
 const control = require('../mvc/control');
 const model = require('../mvc/model');
 
-router.get('/', (req, res, next) => {
+router.get('/', middleware(), (req, res, next) => {
+  console.log(req.session.passport.user.id);
   res.render('features', {
+    username: req.user.username,
+    login: true,
     features: 'Тут будут фичи',
     addClassFeatures: 'active',
   });

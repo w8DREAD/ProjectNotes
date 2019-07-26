@@ -31,13 +31,12 @@ class User {
 
   static create(user) {
     const newUser = new User(user.username, user.password, user.email, user.telephone, user.dateBirthday);
-    handler.Users.takeFromDb();
     return handler.Users.pushInDb(newUser)
   }
 }
 
 class Note {
-  constructor(tag, text, author = 'someBody', userId) {
+  constructor(tag, text, author, userId) {
     this.userId = userId
     this.tag = tag;
     this.text = text;
@@ -58,8 +57,8 @@ class Note {
       return note
     })
   }
-  static create({ tagsText, notesText }) {
-    const notes = new Note(tagsText, notesText );
+  static create(tag, text, author, userId) {
+    const notes = new Note(tag, text, author, userId);
     return handler.Notes.pushInDb(notes);
   }
 
@@ -81,8 +80,8 @@ class Comment {
     this.author = author;
   }
 
-  static create(id, text) {
-    const comment = new Comment(id, text, 'author');
+  static create(id, text, author) {
+    const comment = new Comment(id, text, author);
     return handler.Comments.pushInDb(comment);
   }
 }

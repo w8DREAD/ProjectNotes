@@ -17,6 +17,8 @@ const logsRouter = require('./routes/logs');
 
 const app = express();
 
+require('./auth/passport')(app);
+
 app.engine('.hbs', exphbs({
   defaultLayout: 'layout',
   extname: '.hbs',
@@ -26,8 +28,6 @@ app.engine('.hbs', exphbs({
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
-
-require('./auth')._passport(app);
 
 app
   .use(logger('dev'))
