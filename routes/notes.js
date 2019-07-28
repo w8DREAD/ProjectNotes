@@ -26,8 +26,9 @@ router.post('/', async (req, res, next) => {
 });
 
 router.post('/like', async (req, res, next) => {
-  const {noteId, author} = req.body
-  if (await control.Like.create({noteId, author})) {
+  const noteId = req.body.noteId
+  const userId = req.session.passport.user.id
+  if (await control.Like.create({noteId, userId})) {
     res.status(200).json({status: true})
   } else {
     res.status(200).json({status: false})

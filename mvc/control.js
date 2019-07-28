@@ -87,12 +87,12 @@ class Comment {
 }
 
 class Like {
-  constructor(noteId, author) {
+  constructor(noteId, userId) {
     this.noteId = noteId;
-    this.author = author;
+    this.userId = userId;
   }
-  static async create({ noteId, author }) {
-    const like = new Like( noteId, author);
+  static async create({ noteId, userId }) {
+    const like = new Like( noteId, userId);
     if(await this.check(like)) {
       await handler.Likes.pushInDb(like)
       return true

@@ -122,7 +122,6 @@ window.addEventListener('click', (target) => {
 // поставить лайк
 window.addEventListener('click', (target) => {
   const targetClassName = target.target.className;
-  const author = 'Vasiliy';
   let idForDb;
   if (target.target.attributes.name) {
     idForDb = target.target.attributes.name.value;
@@ -130,7 +129,6 @@ window.addEventListener('click', (target) => {
   if (targetClassName === 'like') {
     const json = JSON.stringify({
       noteId: idForDb,
-      author,
     });
     xhr('post', '/api/v1/notes/like', json, 'application/json')
       .then((res) => {

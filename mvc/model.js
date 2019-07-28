@@ -8,7 +8,7 @@ openDb()
     db.serialize(() => {
       workWithTable(db, 'CREATE TABLE IF NOT EXISTS comments (text TEXT NOT NULL, author TEXT NOT NULL, noteId INTEGER NOT NULL)');
       workWithTable(db, 'CREATE TABLE IF NOT EXISTS notes (tag TEXT NOT NULL, text TEXT NOT NULL, author TEXT NO NULL, date TEXT NO NULL, userId INTEGER NOT NULL)');
-      workWithTable(db, 'CREATE TABLE IF NOT EXISTS likes (noteId TEXT NOT NULL, author TEXT NO NULL)');
+      workWithTable(db, 'CREATE TABLE IF NOT EXISTS likes (noteId TEXT NOT NULL, userId TEXT NO NULL)');
       workWithTable(db, 'CREATE TABLE IF NOT EXISTS users (username TEXT NOT NULL, password TEXT NOT NULL, email TEXT NO NULL, telephone INTEGER NOT NULL, date TEXT)');
       closeDb(db);
     });
@@ -121,7 +121,7 @@ class Likes {
   static pushInDb(like) {
     return openDb()
       .then((db) => {
-        workWithTable(db, 'INSERT INTO likes VALUES (?,?)', [like.noteId, like.author]);
+        workWithTable(db, 'INSERT INTO likes VALUES (?,?)', [like.noteId, like.userId]);
         closeDb(db);
         return console.log('Push comment in Db');
       })
@@ -132,9 +132,11 @@ class Likes {
     return openDb()
       .then(db => selectFromTable(db, 'SELECT rowid AS id, * FROM likes')
         .then((likes) => {
-          const author = likes.filter(dbLike => dbLike.author === like.author
+          console.log('All likes = ');
+          console.log(likes);
+          const userId = likes.filter(dbLike => +dbLike.userId === +like.userId
             && dbLike.noteId === like.noteId);
-          if (author.length) {
+          if (userId.length) {
             selectFromTable(db, `DELETE FROM likes WHERE noteId = ${like.noteId}`);
             closeDb(db);
             return false;
