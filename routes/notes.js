@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const control = require('../mvc/control');
 const middleware = require('../auth/middleware')
+const passport = require('passport')
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -36,14 +37,22 @@ router.post('/like', async (req, res, next) => {
 });
 
 router.put('/:id', async (req, res, next) => {
-  const text = req.body.noteText;
+  const text = req.body;
   const id = req.params.id;
   await control.Note.edit(text, id);
   res.status(200);
 });
+
 router.delete('/:id', async (req, res, next) => {
   const id = req.params.id;
   await control.Note.delete(id);
+  console.log('loading page');
+  res.sendStatus(200);
+});
+
+router.delete('/comments/:id', async (req, res, next) => {
+  const id = req.params.id;
+  await control.Comment.delete(id);
   console.log('loading page');
   res.sendStatus(200);
 });

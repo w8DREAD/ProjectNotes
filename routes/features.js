@@ -9,7 +9,6 @@ const control = require('../mvc/control');
 const model = require('../mvc/model');
 
 router.get('/', middleware(), (req, res, next) => {
-  console.log(req.session.passport.user.id);
   res.render('features', {
     username: req.user.username,
     login: true,

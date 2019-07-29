@@ -49,9 +49,12 @@ class Note {
     let notes = await handler.Notes.takeFromDb();
     let comments = await handler.Comments.takeFromDb();
     let likes = await handler.Likes.takeFromDb();
+
+    let qwe = await handler.Comments.takeLastFromDb();
+    console.log(qwe)
+
     return notes.map(note => {
       let noteLikes = likes.filter(like => +like.noteId === note.id)
-      console.log(noteLikes)
       note.likes = noteLikes.length
       note.comments = comments.filter(comment => comment.noteId === note.id)
       return note
@@ -64,12 +67,18 @@ class Note {
 
   static delete(id) {
     handler.Likes.deleteFromDb(id)
-    handler.Comments.deleteFromDb(id);
+    handler.Comments.deleteFromDb('noteId', id);
     handler.Notes.deleteFromDb(id);
   }
 
   static edit(text, id) {
-    return handler.Notes.editInDb(text, id);
+    if (text.noteText) {
+      handler.Notes.editTextInDb(text.noteText, id);
+    }
+    if (text.tagText) {
+      handler.Notes.editTagInDb(text.tagText, id);
+    }
+    return true
   }
 }
 
@@ -83,6 +92,10 @@ class Comment {
   static create(id, text, author) {
     const comment = new Comment(id, text, author);
     return handler.Comments.pushInDb(comment);
+  }
+
+  static delete(id) {
+    handler.Comments.deleteFromDb('rowid', id);
   }
 }
 

@@ -74,10 +74,20 @@ class Notes {
       .catch(err => console.log(`Упс! Что-то пошло не так ---> ${err.message}`));
   }
 
-  static editInDb(text, id) {
+  static editTextInDb(text, id) {
     openDb()
       .then((db) => {
         workWithTable(db, 'UPDATE notes SET text = ? WHERE rowid = ?', [text, id]);
+        closeDb(db);
+        return console.log('Отредактировано');
+      })
+      .catch(err => console.log(`Упс! Не отредактировал ---> ${err.message}`));
+  }
+
+  static editTagInDb(text, id) {
+    openDb()
+      .then((db) => {
+        workWithTable(db, 'UPDATE notes SET tag = ? WHERE rowid = ?', [text, id]);
         closeDb(db);
         return console.log('Отредактировано');
       })
@@ -106,10 +116,20 @@ class Comments {
       .catch(err => console.log(`Не удалось закрыть или прочитать БД---> ${err.message}`));
   }
 
-  static deleteFromDb(id) {
+  static takeLastFromDb() {
     return openDb()
       .then((db) => {
-        selectFromTable(db, `DELETE FROM comments WHERE noteId = ${id}`);
+        const result = selectFromTable(db, 'SELECT last_insert_rowid() FROM comments ');
+        closeDb(db);
+        return result;
+      })
+      .catch(err => console.log(`Не удалось закрыть или прочитать БД---> ${err.message}`));
+  }
+
+  static deleteFromDb(field, id) {
+    return openDb()
+      .then((db) => {
+        selectFromTable(db, `DELETE FROM comments WHERE ${field} = ${id}`);
         closeDb(db);
         return console.log('Удалено');
       })
@@ -132,8 +152,6 @@ class Likes {
     return openDb()
       .then(db => selectFromTable(db, 'SELECT rowid AS id, * FROM likes')
         .then((likes) => {
-          console.log('All likes = ');
-          console.log(likes);
           const userId = likes.filter(dbLike => +dbLike.userId === +like.userId
             && dbLike.noteId === like.noteId);
           if (userId.length) {

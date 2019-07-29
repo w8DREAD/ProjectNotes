@@ -19,16 +19,6 @@ const app = express();
 
 require('./auth/passport')(app);
 
-app.engine('.hbs', exphbs({
-  defaultLayout: 'layout',
-  extname: '.hbs',
-  layoutsDir: path.join(`${__dirname}/views`),
-  partialsDir: path.join(`${__dirname}/partials`),
-}));
-
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
-
 app
   .use(logger('dev'))
   .use(express.json())
@@ -49,6 +39,16 @@ app
   .use(passport.initialize())
   .use(passport.session())
 
+app.engine('.hbs', exphbs({
+  defaultLayout: 'layout',
+  extname: '.hbs',
+  layoutsDir: path.join(`${__dirname}/views`),
+  partialsDir: path.join(`${__dirname}/partials`),
+}));
+
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hbs');
+app
   .use('/api/v1/', indexRouter)
   .use('/api/v1/notes', notesRouter)
   .use('/api/v1/features', featuresRouter)

@@ -3,22 +3,29 @@
     {{#notes}}
 
         <form class="articles-news" name="news" id="post-{{id}}">
-            <div class="notes">
+            <div style="margin-top: 15px">
                 <p>
-                    <a href="">{{tag}}</a>
-                    <button type="submit" class="close button" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true" id="delete-{{id}}" name={{id}}>&times;</span>
+                    <button type="submit" class="close button notes" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true" id="delete-notes-{{id}}" name={{id}}>&times;</span>
                     </button>
-                    <button type="submit" class="like edit button" style="margin-right: 5px" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true" id="edit-{{id}}" name={{id}}>✎</span>
-                    </button>
+                    <br>
+                    <div>
+                <button type="submit" class="like edit tag button" style="margin-right: 5px" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true" id="edit-tag-{{id}}" name={{id}}>&nbsp✎</span>
+                </button>
+                <a id="tag-{{id}}" href="">{{tag}}</a>
+                    </div>
+
                 </p>
 
             </div>
-            <div class="notes" style="margin-bottom: 15px" id="note-{{id}}">
+            <button type="submit" class="like edit text button" style="margin-right: 5px" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true" id="edit-text-{{id}}" name={{id}}>&nbsp✎</span>
+            </button>
+            <div style="margin: 15px 0 15px 0" id="note-{{id}}">
                     {{text}}
             </div>
-            <div class="notes" style="margin-bottom: 15px" id="info-note-{{id}}">
+            <div style="margin: 15px 0 15px 0" id="info-note-{{id}}">
                 Автор: {{author}} <br> Опубликовано: {{date}}
             </div>
 
@@ -29,7 +36,10 @@
             {{#comments}}
             <div class="articles-news comments">
                {{text}}<br>
-                <span aria-hidden="true" style="float: right">{{author}}</span>
+                <button type="submit" class="close button comment" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true" id="delete-comment-{{id}}" name={{id}}>&times;</span>
+                </button> <br>
+                <span aria-hidden="true" style="float: left; margin-top: 10px">Комментарий от: {{author}}</span>
             </div>
 
             {{/comments}}

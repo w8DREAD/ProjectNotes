@@ -57,14 +57,10 @@ a {
 }
 
 .content {
-  margin-top: 30px;
+  margin-top: 40px;
   z-index: 1;
   position: relative;
   padding: 50px;
-}
-
-.notes {
-  margin-top: 10px;
 }
 
 .like {
