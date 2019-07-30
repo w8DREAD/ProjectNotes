@@ -1,29 +1,32 @@
 const express = require('express');
-const control = require('../mvc/control');
 const passport = require('passport');
+const control = require('../mvc/control');
+
 const router = express.Router();
-const middleware = require('../auth/middleware')
+const middleware = require('../auth/middleware');
 
 router.get('/register', (req, res, next) => {
-  if(!req.isAuthenticated()) {
+  if (!req.isAuthenticated()) {
     res.render('register');
   } else {
-    res.redirect('/api/v1/')
+    res.redirect('/api/v1/');
   }
 });
 
 router.get('/login', (req, res, next) => {
-  if(!req.isAuthenticated()) {
+  if (!req.isAuthenticated()) {
     res.render('login');
   } else {
-    res.redirect('/api/v1/')
+    res.redirect('/api/v1/');
   }
 });
 
 router.post('/register', async (req, res, next) => {
   const user = req.body;
-  await control.User.create(user);
-  res.redirect('/api/v1/users/login');
+  if (await control.User.create(user)) {
+    return res.redirect('/api/v1/users/login');
+  }
+  return res.render('register', {err: 'На эту почту уже зарегестрирован пользователь!'});
 });
 
 router.get('/logout', middleware(), (req, res) => {
@@ -33,7 +36,7 @@ router.get('/logout', middleware(), (req, res) => {
 
 router.post('/login', passport.authenticate('local', {
   successRedirect: '/api/v1/notes',
-  failureRedirect: '/api/v1/register'
+  failureRedirect: '/api/v1/register',
 }));
 
 module.exports = router;

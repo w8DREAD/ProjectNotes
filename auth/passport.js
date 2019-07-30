@@ -6,23 +6,24 @@ const handler = require('../mvc/model');
 let findUser;
 
 passport.serializeUser((user, done) => {
-  done(null, user);
+  done(null, user.id);
 });
 
-passport.deserializeUser((id, done) => done(null, id));
+passport.deserializeUser(async (id, done) => {
+  const user = await handler.Users.find(`rowid = ${id}`);
+  done(null, user[0]);
+});
 
 const initPassport = () => {
-  passport.use(new LocalStrategy(async (username, password, done) => {
-    const users = await handler.Users.takeFromDb();
-    users.forEach((user) => {
-      if (username === user.username && password === user.password) {
-        findUser = user;
-      }
-    });
-    if (findUser !== undefined) {
-      return done(null, findUser);
+  passport.use(new LocalStrategy(async (email, password, done) => {
+    const user = await handler.Users.find(`email = '${email}'`);
+    if (!user[0]) {
+      return done(null, false, { message: 'Incorrect username.' });
     }
-    return done(null, false);
+    if (user[0].password !== password) {
+      return done(null, false, { message: 'Incorrect password.' });
+    }
+    return done(null, user[0]);
   }));
 
   passport.middleware = middleware;

@@ -29,8 +29,13 @@ class User {
     this.dateBirthday = dateBirthday;
   }
 
-  static create(user) {
-    const newUser = new User(user.username, user.password, user.email, user.telephone, user.dateBirthday);
+  static async create(user) {
+    const newUser = new User(user.username, user.password,
+      user.email, user.telephone, user.dateBirthday);
+    const email = await handler.Users.find(`email = '${user.email}'`);
+    if (email[0]) {
+      return false;
+    }
     return handler.Users.pushInDb(newUser);
   }
 }
@@ -49,7 +54,8 @@ class Note {
     const notes = await handler.Notes.takeFromDb();
     const comments = await handler.Comments.takeFromDb();
     const likes = await handler.Likes.takeFromDb();
-    return notes.map((note) => {
+    return notes.map((arg) => {
+      const note = arg;
       const noteLikes = likes.filter(like => +like.noteId === note.id);
       note.likes = noteLikes.length;
       note.comments = comments.filter(comment => comment.noteId === note.id);

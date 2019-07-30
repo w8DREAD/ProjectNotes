@@ -192,7 +192,8 @@ class Users {
       .then((db) => {
         workWithTable(db, 'INSERT INTO users VALUES (?,?,?,?,?)', [user.username, user.password, user.email, user.telephone, user.dateBirthday]);
         closeDb(db);
-        return console.log('User registered');
+        console.log('User registered');
+        return true;
       })
       .catch(reject => console.log(`Комментарии: Ошибка работы с БД ---> ${reject.message}`));
   }
@@ -201,6 +202,16 @@ class Users {
     return openDb()
       .then((db) => {
         const result = selectFromTable(db, 'SELECT rowid AS id, * FROM users');
+        closeDb(db);
+        return result;
+      })
+      .catch(err => console.log(`Не удалось закрыть или прочитать БД---> ${err.message}`));
+  }
+
+  static find(params) {
+    return openDb()
+      .then(async (db) => {
+        const result = await selectFromTable(db, `SELECT rowid as id, * FROM users WHERE ${params}`);
         closeDb(db);
         return result;
       })

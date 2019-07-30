@@ -10,11 +10,12 @@
         </div>
         <div class="col-md-4 mb-3">
             <label for="validationDefaultUsername">Email</label>
-                <input type="text" class="form-control" id="validationDefaultUsername" name="email" placeholder="Email@com" aria-describedby="inputGroupPrepend2" required>
+                <input type="email" class="form-control" id="validationDefaultUsername" name="email" placeholder="Email@com" aria-describedby="inputGroupPrepend2" required>
+            <small id="emailHelp" class="form-text text-muted">{{err}}</small>
         </div>
         <div class="col-md-6 mb-3">
             <label for="validationDefault03">Номер телефона</label>
-            <input type="tel" class="form-control" id="validationDefault03" name="telephone" placeholder="89876543210" required>
+            <input type="number" class="form-control" id="validationDefault03" name="telephone" placeholder="89876543210" required>
         </div>
         <div class="col-md-3 mb-3">
             <label for="validationDefault04">Дата рождения</label>
