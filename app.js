@@ -14,6 +14,7 @@ const notesRouter = require('./routes/notes');
 const featuresRouter = require('./routes/features');
 const addNotesRouter = require('./routes/addNotes');
 const logsRouter = require('./routes/logs');
+const commentsRouter = require('./routes/comments');
 
 const app = express();
 
@@ -26,7 +27,8 @@ app
   .use(cookieParser())
   .use(express.static(path.join(__dirname, 'public')))
   .use(session({
-    secret: 'secretword',
+    secret: 'secretWord4ProjectNotes',
+    name: 'sessionProjectNotes',
     store: new SessionStore(),
     cookie: {
       path: '/',
@@ -37,7 +39,7 @@ app
     saveUninitialized: false,
   }))
   .use(passport.initialize())
-  .use(passport.session())
+  .use(passport.session());
 
 app.engine('.hbs', exphbs({
   defaultLayout: 'layout',
@@ -55,6 +57,7 @@ app
   .use('/api/v1/users', usersRouter)
   .use('/api/v1/addNotes', addNotesRouter)
   .use('/logs', logsRouter)
+  .use('/api/v1/comments', commentsRouter)
 
   .use((req, res, next) => {
     next(createError(404));

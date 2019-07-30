@@ -79,14 +79,14 @@ window.addEventListener('click', (target) => {
         const elemNote = tag;
         elemNote.onblur = function () {
           const saveChange = window.confirm('Сохранить изменения?');
-          tag.style.background = '';
+          elemNote.style.background = '';
           tag.setAttribute('contenteditable', 'false');
-          tag.setAttribute('href', "");
+          tag.setAttribute('href', '');
           if (saveChange) {
             const editText = `tagText=${elemNote.innerText}`;
             xhr('put', `notes/${idForDb}`, editText);
           } else {
-            tag.innerText = tagText;
+            elemNote.innerText = tagText;
           }
         };
       });
@@ -113,13 +113,13 @@ window.addEventListener('click', (target) => {
         const elemNote = note;
         elemNote.onblur = function () {
           const saveChange = window.confirm('Сохранить изменения?');
-          note.style.backgroundImage = '-webkit-radial-gradient(center, circle farthest-corner, #fff, #e2e2e2)';
+          elemNote.style.backgroundImage = '-webkit-radial-gradient(center, circle farthest-corner, #fff, #e2e2e2)';
           note.setAttribute('contenteditable', 'false');
           if (saveChange) {
             const editText = `noteText=${elemNote.innerText}`;
             xhr('put', `notes/${idForDb}`, editText);
           } else {
-            note.innerText = noteText;
+            elemNote.innerText = noteText;
           }
         };
       });
@@ -141,15 +141,15 @@ window.addEventListener('click', (target) => {
       id: idForDb,
       text: textInner,
     });
-    xhr('post', '/api/v1/notes', json, 'application/json')
+    xhr('post', '/api/v1/comments/create', json, 'application/json')
       .then((res) => {
-        const {author} = JSON.parse(res);
+        const response = JSON.parse(res);
         containerForComments.insertAdjacentHTML('beforebegin', `<div class="articles-news comments">
                ${textInner}<br>
                 <button type="submit" class="close button comment" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true" id="delete-comment-${idForDb}" name=${idForDb}>&times;</span>
+                    <span aria-hidden="true" id="delete-comment-${response.id}" name=${response.id}>&times;</span>
                 </button> <br>
-                <span aria-hidden="true" style="float: left; margin-top: 10px">Комментарий от: ${author}</span>
+                <span aria-hidden="true" style="float: left; margin-top: 10px">Комментарий от: ${response.author}</span>
             </div>`);
         enterField.innerText = '';
         return true;
@@ -162,7 +162,6 @@ window.addEventListener('click', (target) => {
   const targetClassName = target.target.parentNode.className;
   let idForDb;
   if (target.target.attributes.name) {
-    console.log(target.target);
     idForDb = target.target.attributes.name.value;
   }
   if (targetClassName === 'close button comment') {
@@ -176,7 +175,7 @@ window.addEventListener('click', (target) => {
     });
     const deleteApply = window.confirm('Вы уверены что хотите удалить комментарий?');
     if (deleteApply) {
-      xhr('delete', `notes/comments/${idForDb}`);
+      xhr('delete', `/api/v1/comments/${idForDb}`);
       comment.parentNode.removeChild(comment);
     }
   }

@@ -1,10 +1,11 @@
 const express = require('express');
+
 const router = express.Router();
 const bodyParser = require('body-parser');
+
 const app = express();
 const control = require('../mvc/control');
-const middleware = require('../auth/middleware')
-const passport = require('passport')
+const middleware = require('../auth/middleware');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -18,21 +19,14 @@ router.get('/', middleware(), async (req, res, next) => {
     notes: notes.reverse(),
   });
 });
-router.post('/', async (req, res, next) => {
-  const text = req.body.text;
-  const id = req.body.id
-  const author = req.user.username;
-  await control.Comment.create(id, text, author);
-  res.status(200).json({author: req.user.username});
-});
 
 router.post('/like', async (req, res, next) => {
-  const noteId = req.body.noteId
-  const userId = req.session.passport.user.id
+  const noteId = req.body.noteId;
+  const userId = req.session.passport.user.id;
   if (await control.Like.create({noteId, userId})) {
-    res.status(200).json({status: true})
+    res.status(200).json({status: true});
   } else {
-    res.status(200).json({status: false})
+    res.status(200).json({status: false});
   }
 });
 
@@ -46,13 +40,6 @@ router.put('/:id', async (req, res, next) => {
 router.delete('/:id', async (req, res, next) => {
   const id = req.params.id;
   await control.Note.delete(id);
-  console.log('loading page');
-  res.sendStatus(200);
-});
-
-router.delete('/comments/:id', async (req, res, next) => {
-  const id = req.params.id;
-  await control.Comment.delete(id);
   console.log('loading page');
   res.sendStatus(200);
 });

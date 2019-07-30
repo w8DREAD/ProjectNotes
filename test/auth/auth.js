@@ -7,7 +7,7 @@ const agent = request.agent('http://localhost:3000');
 describe('Sessions', () => {
   it('Should create a session', (done) => {
     agent.post('/api/v1/users/login')
-      .send({ username: 'asd', password: 'asd' })
+      .send({ username: 'qwe', password: 'qwe' })
       .end((err, req, res) => {
         expect(req.headers.location).to.equal('/api/v1/notes');
         done();

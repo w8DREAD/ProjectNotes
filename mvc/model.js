@@ -6,7 +6,7 @@ const openDb = () => Promise.resolve(new sqlite.Database('data.db'));
 openDb()
   .then((db) => {
     db.serialize(() => {
-      workWithTable(db, 'CREATE TABLE IF NOT EXISTS comments (text TEXT NOT NULL, author TEXT NOT NULL, noteId INTEGER NOT NULL)');
+      workWithTable(db, 'CREATE TABLE IF NOT EXISTS comments (text TEXT NOT NULL, author TEXT NOT NULL, noteId INTEGER NOT NULL, userId INTEGER NOT NULL)');
       workWithTable(db, 'CREATE TABLE IF NOT EXISTS notes (tag TEXT NOT NULL, text TEXT NOT NULL, author TEXT NO NULL, date TEXT NO NULL, userId INTEGER NOT NULL)');
       workWithTable(db, 'CREATE TABLE IF NOT EXISTS likes (noteId TEXT NOT NULL, userId TEXT NO NULL)');
       workWithTable(db, 'CREATE TABLE IF NOT EXISTS users (username TEXT NOT NULL, password TEXT NOT NULL, email TEXT NO NULL, telephone INTEGER NOT NULL, date TEXT)');
@@ -93,15 +93,27 @@ class Notes {
       })
       .catch(err => console.log(`Упс! Не отредактировал ---> ${err.message}`));
   }
+
+  static editTagInDbff(text, id) {
+    return run(db => workWithTable(db, 'UPDATE notes SET tag = ? WHERE rowid = ?', [text, id]));
+  }
+}
+
+async function run(queryfn) {
+  const db = await openDb();
+  const res = await queryfn(db);
+  closeDb(db);
+  return res;
 }
 
 class Comments {
   static pushInDb(comment) {
     return openDb()
       .then((db) => {
-        workWithTable(db, 'INSERT INTO comments VALUES (?,?,?)', [comment.text, comment.author, comment.noteId]);
+        workWithTable(db, 'INSERT INTO comments VALUES (?,?,?,?)', [comment.text, comment.author, comment.noteId, comment.userId]);
+        const result = selectFromTable(db, 'SELECT last_insert_rowid() AS id');
         closeDb(db);
-        return console.log('Push comment in Db');
+        return result;
       })
       .catch(reject => console.log(`Комментарии: Ошибка работы с БД ---> ${reject.message}`));
   }
@@ -110,16 +122,6 @@ class Comments {
     return openDb()
       .then((db) => {
         const result = selectFromTable(db, 'SELECT rowid AS id, * FROM comments');
-        closeDb(db);
-        return result;
-      })
-      .catch(err => console.log(`Не удалось закрыть или прочитать БД---> ${err.message}`));
-  }
-
-  static takeLastFromDb() {
-    return openDb()
-      .then((db) => {
-        const result = selectFromTable(db, 'SELECT last_insert_rowid() FROM comments ');
         closeDb(db);
         return result;
       })

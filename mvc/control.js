@@ -23,7 +23,7 @@ function formatDate() {
 class User {
   constructor(name, password, email, telephone, dateBirthday) {
     this.username = name;
-    this.password = password
+    this.password = password;
     this.email = email;
     this.telephone = telephone;
     this.dateBirthday = dateBirthday;
@@ -31,66 +31,63 @@ class User {
 
   static create(user) {
     const newUser = new User(user.username, user.password, user.email, user.telephone, user.dateBirthday);
-    return handler.Users.pushInDb(newUser)
+    return handler.Users.pushInDb(newUser);
   }
 }
 
 class Note {
   constructor(tag, text, author, userId) {
-    this.userId = userId
+    this.userId = userId;
     this.tag = tag;
     this.text = text;
     this.author = author;
     this.date = formatDate();
-    this.likes = 0
+    this.likes = 0;
   }
 
   static async render() {
-    let notes = await handler.Notes.takeFromDb();
-    let comments = await handler.Comments.takeFromDb();
-    let likes = await handler.Likes.takeFromDb();
-
-    let qwe = await handler.Comments.takeLastFromDb();
-    console.log(qwe)
-
-    return notes.map(note => {
-      let noteLikes = likes.filter(like => +like.noteId === note.id)
-      note.likes = noteLikes.length
-      note.comments = comments.filter(comment => comment.noteId === note.id)
-      return note
-    })
+    const notes = await handler.Notes.takeFromDb();
+    const comments = await handler.Comments.takeFromDb();
+    const likes = await handler.Likes.takeFromDb();
+    return notes.map((note) => {
+      const noteLikes = likes.filter(like => +like.noteId === note.id);
+      note.likes = noteLikes.length;
+      note.comments = comments.filter(comment => comment.noteId === note.id);
+      return note;
+    });
   }
+
   static create(tag, text, author, userId) {
     const notes = new Note(tag, text, author, userId);
     return handler.Notes.pushInDb(notes);
   }
 
   static delete(id) {
-    handler.Likes.deleteFromDb(id)
+    handler.Likes.deleteFromDb(id);
     handler.Comments.deleteFromDb('noteId', id);
     handler.Notes.deleteFromDb(id);
   }
 
   static edit(text, id) {
     if (text.noteText) {
-      handler.Notes.editTextInDb(text.noteText, id);
+      return handler.Notes.editTextInDb(text.noteText, id);
     }
     if (text.tagText) {
-      handler.Notes.editTagInDb(text.tagText, id);
+      return handler.Notes.editTagInDb(text.tagText, id);
     }
-    return true
   }
 }
 
 class Comment {
-  constructor(noteId = 1, text, author) {
+  constructor(noteId = 1, text, author, userId) {
+    this.userId = userId;
     this.noteId = +noteId;
     this.text = text;
     this.author = author;
   }
 
-  static create(id, text, author) {
-    const comment = new Comment(id, text, author);
+  static create(dataComment) {
+    const comment = new Comment(dataComment.id, dataComment.text, dataComment.author, dataComment.userId);
     return handler.Comments.pushInDb(comment);
   }
 
@@ -104,18 +101,18 @@ class Like {
     this.noteId = noteId;
     this.userId = userId;
   }
-  static async create({ noteId, userId }) {
-    const like = new Like( noteId, userId);
-    if(await this.check(like)) {
-      await handler.Likes.pushInDb(like)
-      return true
-    } else {
-      return false
-    }
 
+  static async create({ noteId, userId }) {
+    const like = new Like(noteId, userId);
+    if (await this.check(like)) {
+      await handler.Likes.pushInDb(like);
+      return true;
+    }
+    return false;
   }
+
   static check(like) {
-    return handler.Likes.checkInDb(like)
+    return handler.Likes.checkInDb(like);
   }
 }
 module.exports = {
