@@ -12,12 +12,10 @@ module.exports = {
       maxLength: 25,
     },
     email: {
-      type: 'number',
       format: 'email',
     },
     telephone: {
       type: 'number',
-      length: 11,
     },
     dateBirthday: {
       type: 'string',

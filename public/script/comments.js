@@ -15,16 +15,32 @@ window.addEventListener('click', (target) => {
     });
     xhr('post', '/api/v1/comments/create', json, 'application/json')
       .then((res) => {
+        if (document.getElementById('elemErr')) {
+          const delElem = document.getElementById('elemErr');
+          delElem.parentNode.removeChild(delElem);
+        }
         const response = JSON.parse(res);
-        containerForComments.insertAdjacentHTML('beforebegin', `<div class="articles-news comments">
-               ${textInner}<br>
-                <button type="submit" class="close button comment" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true" id="delete-comment-${response.id}" name=${response.id}>&times;</span>
-                </button> <br>
-                <span aria-hidden="true" style="float: left; margin-top: 10px">Комментарий от: ${response.author}</span>
-            </div>`);
+        const comment = `<div class="articles-news comments">
+                            ${textInner}<br>
+                            <button type="submit" class="close button comment" data-dismiss="alert" aria-label="Close">
+                                 <span aria-hidden="true" id="delete-comment-${response.id}" name=${response.id}>&times;</span>
+                            </button> <br>
+                            <span aria-hidden="true" style="float: left; margin-top: 10px">Комментарий от: ${response.author}</span>
+                         </div>`;
+        containerForComments.insertAdjacentHTML('beforebegin', comment);
         enterField.innerText = '';
         return true;
+      })
+      .catch((err) => {
+        const elemErr = `<div class="alert alert-warning" style="margin-top: 10px" role="alert" id="elemErr">
+                            ${err.statusText}
+                         </div>`;
+        const form = target.target.parentNode.parentNode;
+        if (document.getElementById('elemErr')) {
+          const delElem = document.getElementById('elemErr');
+          delElem.parentNode.removeChild(delElem);
+        }
+        return form.insertAdjacentHTML('beforebegin', elemErr);
       });
   }
 });

@@ -32,7 +32,7 @@ router.post('/register', async (req, res, next) => {
   if (await control.User.create(user)) {
     return res.redirect('/api/v1/users/login');
   }
-  return res.render('register', {err: 'На эту почту уже зарегестрирован пользователь!'});
+  return res.status(400).json('На эту почту уже зарегестрирован пользователь!');
 });
 
 router.get('/logout', middleware(), (req, res) => {

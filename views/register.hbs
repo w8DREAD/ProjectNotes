@@ -1,4 +1,4 @@
-<form method="post">
+<form>
     {{#if err}}
         <div class="alert alert-warning" role="alert">
             {{err}}
@@ -7,19 +7,19 @@
     <div class="form-row">
         <div class="col-md-4 mb-3">
             <label for="validationDefault01">Имя пользователя</label>
-            <input type="text" class="form-control" id="validationDefault01" name="username" placeholder="Имя" value="" required>
+            <input type="text" class="form-control" id="validationDefaultUsername" name="username" placeholder="Имя" value="" required>
         </div>
         <div class="col-md-4 mb-3">
             <label for="validationDefault02">Пароль</label>
-            <input type="password" class="form-control" id="validationDefault02" name="password" placeholder="Пароль" value="" required>
+            <input type="password" class="form-control" id="validationDefault01" name="password" placeholder="Пароль" value="" required>
         </div>
         <div class="col-md-4 mb-3">
             <label for="validationDefaultUsername">Email</label>
-                <input type="email" class="form-control" id="validationDefaultUsername" name="email" placeholder="Email@com" aria-describedby="inputGroupPrepend2" required>
+                <input type="text" class="form-control" id="validationDefault02" name="email" placeholder="Email@com" aria-describedby="inputGroupPrepend2" required>
         </div>
         <div class="col-md-6 mb-3">
             <label for="validationDefault03">Номер телефона</label>
-            <input type="number" class="form-control" id="validationDefault03" name="telephone" placeholder="89876543210" required>
+            <input type="text" class="form-control" id="validationDefault03" name="telephone" placeholder="89876543210" required>
         </div>
         <div class="col-md-3 mb-3">
             <label for="validationDefault04">Дата рождения</label>

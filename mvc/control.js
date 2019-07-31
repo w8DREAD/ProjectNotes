@@ -85,15 +85,16 @@ class Note {
 }
 
 class Comment {
-  constructor(noteId = 1, text, author, userId) {
+  constructor(noteId, text, author, userId) {
     this.userId = userId;
-    this.noteId = +noteId;
+    this.noteId = noteId;
     this.text = text;
     this.author = author;
   }
 
   static create(dataComment) {
-    const comment = new Comment(dataComment.id, dataComment.text, dataComment.author, dataComment.userId);
+    const comment = new Comment(dataComment.id, dataComment.text,
+      dataComment.author, dataComment.userId);
     return handler.Comments.pushInDb(comment);
   }
 
