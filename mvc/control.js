@@ -50,15 +50,35 @@ class Note {
     this.likes = 0;
   }
 
-  static async render() {
-    const notes = await handler.Notes.takeFromDb();
-    const comments = await handler.Comments.takeFromDb();
-    const likes = await handler.Likes.takeFromDb();
-    return notes.map((arg) => {
+  static async render(userId) {
+    const notesFromDb = await handler.Notes.takeFromDb();
+    const commentsFromDb = await handler.Comments.takeFromDb();
+    const likesFromDb = await handler.Likes.takeFromDb();
+    const notes = notesFromDb.map((arg) => {
       const note = arg;
-      const noteLikes = likes.filter(like => +like.noteId === note.id);
+      const noteLikes = likesFromDb.filter(like => +like.noteId === note.id);
       note.likes = noteLikes.length;
-      note.comments = comments.filter(comment => comment.noteId === note.id);
+      note.comments = commentsFromDb.filter(comment => comment.noteId === note.id);
+      return note;
+    });
+    return notes.map((note) => {
+      if (note.userId === userId) {
+        note.root = true;
+        const comments = note.comments.slice();
+        note.comments = comments.map((com) => {
+          com.root = true;
+          return com;
+        });
+        return note;
+      }
+      const comments = note.comments.slice();
+      note.comments = comments.map((com) => {
+        if (com.userId === userId) {
+          com.root = true;
+          return com;
+        }
+        return com;
+      });
       return note;
     });
   }
