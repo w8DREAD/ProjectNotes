@@ -63,9 +63,9 @@ class Note {
     });
   }
 
-  static create(tag, text, author, userId) {
-    const notes = new Note(tag, text, author, userId);
-    return handler.Notes.pushInDb(notes);
+  static create(data) {
+    const note = new Note(data.tagText, data.noteText, data.author, data.userId);
+    return handler.Notes.pushInDb(note);
   }
 
   static delete(id) {

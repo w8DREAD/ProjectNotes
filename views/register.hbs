@@ -1,4 +1,9 @@
 <form method="post">
+    {{#if err}}
+        <div class="alert alert-warning" role="alert">
+            {{err}}
+        </div>
+    {{/if}}
     <div class="form-row">
         <div class="col-md-4 mb-3">
             <label for="validationDefault01">Имя пользователя</label>
@@ -11,7 +16,6 @@
         <div class="col-md-4 mb-3">
             <label for="validationDefaultUsername">Email</label>
                 <input type="email" class="form-control" id="validationDefaultUsername" name="email" placeholder="Email@com" aria-describedby="inputGroupPrepend2" required>
-            <small id="emailHelp" class="form-text text-muted">{{err}}</small>
         </div>
         <div class="col-md-6 mb-3">
             <label for="validationDefault03">Номер телефона</label>
@@ -22,5 +26,5 @@
             <input type="date" class="form-control" id="validationDefault04" name="dateBirthday" placeholder="State" required>
         </div>
     </div>
-    <button class="btn btn-primary" type="submit">Зарегистрировать</button>
+    <button class="btn btn-primary register-user" type="button">Зарегистрировать</button>
 </form>

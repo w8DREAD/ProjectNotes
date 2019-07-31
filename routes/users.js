@@ -2,6 +2,8 @@ const express = require('express');
 const passport = require('passport');
 const control = require('../mvc/control');
 
+const schema = require('../schemes');
+
 const router = express.Router();
 const middleware = require('../auth/middleware');
 
@@ -23,6 +25,10 @@ router.get('/login', (req, res, next) => {
 
 router.post('/register', async (req, res, next) => {
   const user = req.body;
+  const valid = schema.validator(schema.register, user);
+  if (valid) {
+    return res.status(400).json(valid);
+  }
   if (await control.User.create(user)) {
     return res.redirect('/api/v1/users/login');
   }
