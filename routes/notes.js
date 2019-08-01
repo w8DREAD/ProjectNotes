@@ -7,6 +7,8 @@ const app = express();
 const control = require('../mvc/control');
 const middleware = require('../auth/middleware');
 
+const qwe = require('../mongodb/mongo');
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -20,7 +22,7 @@ router.get('/', async (req, res, next) => {
     name = req.user.username;
   }
   const notes = await control.Note.render(userId) || [];
-
+  // console.log(notes);
   res.render('notes', {
     username: name,
     login: log,
