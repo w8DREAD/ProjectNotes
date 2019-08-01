@@ -3,16 +3,16 @@ const sqlite = require('sqlite3').verbose();
 
 const openDb = () => Promise.resolve(new sqlite.Database('data.db'));
 
-openDb()
-  .then((db) => {
-    db.serialize(() => {
-      workWithTable(db, 'CREATE TABLE IF NOT EXISTS comments (text TEXT NOT NULL, author TEXT NOT NULL, noteId INTEGER NOT NULL, userId INTEGER NOT NULL)');
-      workWithTable(db, 'CREATE TABLE IF NOT EXISTS notes (tag TEXT NOT NULL, text TEXT NOT NULL, author TEXT NO NULL, date TEXT NO NULL, userId INTEGER NOT NULL)');
-      workWithTable(db, 'CREATE TABLE IF NOT EXISTS likes (noteId TEXT NOT NULL, userId TEXT NO NULL)');
-      workWithTable(db, 'CREATE TABLE IF NOT EXISTS users (username TEXT NOT NULL, password TEXT NOT NULL, email TEXT NO NULL, telephone INTEGER NOT NULL, date TEXT)');
-      closeDb(db);
-    });
-  });
+// openDb()
+//   .then((db) => {
+//     db.serialize(() => {
+//       workWithTable(db, 'CREATE TABLE IF NOT EXISTS comments (text TEXT NOT NULL, author TEXT NOT NULL, noteId INTEGER NOT NULL, userId INTEGER NOT NULL)');
+//       workWithTable(db, 'CREATE TABLE IF NOT EXISTS notes (tag TEXT NOT NULL, text TEXT NOT NULL, author TEXT NO NULL, date TEXT NO NULL, userId INTEGER NOT NULL)');
+//       workWithTable(db, 'CREATE TABLE IF NOT EXISTS likes (noteId TEXT NOT NULL, userId TEXT NO NULL)');
+//       workWithTable(db, 'CREATE TABLE IF NOT EXISTS users (username TEXT NOT NULL, password TEXT NOT NULL, email TEXT NO NULL, telephone INTEGER NOT NULL, date TEXT)');
+//       closeDb(db);
+//     });
+//   });
 
 function selectFromTable(db, setupTable) {
   return new Promise((resolve, reject) => {
@@ -154,8 +154,9 @@ class Likes {
     return openDb()
       .then(db => selectFromTable(db, 'SELECT rowid AS id, * FROM likes')
         .then((likes) => {
+          console.log(likes);
           const userId = likes.filter(dbLike => +dbLike.userId === +like.userId
-            && dbLike.noteId === like.noteId);
+            && +dbLike.noteId === +like.noteId);
           if (userId.length) {
             selectFromTable(db, `DELETE FROM likes WHERE noteId = ${like.noteId}`);
             closeDb(db);

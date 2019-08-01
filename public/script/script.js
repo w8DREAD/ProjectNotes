@@ -1,3 +1,4 @@
+
 if (window.location.pathname === '/logs') {
   const socket = io.connect('http://localhost:3000');
   socket.on('send', (data) => {

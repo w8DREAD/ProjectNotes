@@ -15,14 +15,16 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  return db.createTable('pets', {
-    id: { type: 'int', primaryKey: true },
-    name: 'string'
+  return db.createTable('comments', {
+    text: 'string',
+    author: 'string',
+    noteId: 'int',
+    userId: 'int',
   });
 };
 
 exports.down = function (db) {
-  return db.dropTable('pets');
+  return db.dropTable('comments');
 };
 
 exports._meta = {
