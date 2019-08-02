@@ -5,9 +5,10 @@ const control = require('../mvc/control');
 const schemes = require('../schemes');
 const middleware = require('../auth/middleware');
 
-router.get('/', middleware(), (req, res, next) => {
+router.get('/', middleware(), async (req, res, next) => {
   res.render('addNotes', {
     login: true,
+    like: await control.User.countLikes(req.user.id),
     username: req.user.username,
   });
 });

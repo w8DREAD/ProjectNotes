@@ -122,6 +122,7 @@ window.addEventListener('click', (target) => {
 window.addEventListener('click', (target) => {
   const targetClassName = target.target.className;
   let idForDb;
+  let response;
   if (target.target.attributes.name) {
     idForDb = target.target.attributes.name.value;
   }
@@ -131,6 +132,7 @@ window.addEventListener('click', (target) => {
     });
     xhr('post', '/api/v1/notes/like', json, 'application/json')
       .then((res) => {
+        response = res;
         if (JSON.parse(res).status) {
           return 1;
         }
@@ -139,6 +141,8 @@ window.addEventListener('click', (target) => {
       .then((like) => {
         const currentLikes = document.querySelector(`span.like > p[name="${idForDb}"]`);
         currentLikes.innerText = (+currentLikes.innerText + like);
+        const likes = document.querySelector('h6');
+        likes.innerText = `Набрано лайков: ${JSON.parse(response).likesCount}`;
         return true;
       })
       .catch(err => err);

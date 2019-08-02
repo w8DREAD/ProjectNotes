@@ -7,7 +7,8 @@
     <div class="register-form">
         {{#if login}}
                 <h3>Hey, {{username}}!</h3>
-            <a href="/api/v1/users/logout" class="badge badge-primary" style="font-size: large">Logout</a>
+                    <h6>Набрано лайков: {{like}}</h6>
+            <a href="/api/v1/users/logout" class="badge badge-primary" style="font-size: x-large">Logout</a>
         {{else}}
 
             <a href="/api/v1/users/login" class="badge badge-primary" style="font-size: large">войти</a> |

@@ -1,45 +1,36 @@
 const express = require('express');
-const redis = require('redis');
 
-const client = redis.createClient();
 const router = express.Router();
 const bodyParser = require('body-parser');
+const redis = require('../mongodb/redis');
 
 const app = express();
 const control = require('../mvc/control');
+const handler = require('../mvc/model');
 const middleware = require('../auth/middleware');
-
-const qwe = require('../mongodb/mongo');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+
 router.get('/', async (req, res, next) => {
-  // Прочтем записанное
-  client.get('myLikes', (err, repl) => {
-    if (err) {
-      console.log(`Что то случилось при чтении: ${err}`);
-    } else if (repl) {
-      // Ключ найден
-      console.log(`Ключ: ${repl}`);
-    } else {
-      // Ключ ненайден
-      console.log('Ключ ненайден.');
-    }
-    client.quit();
-  });
+  console.log(await handler.Likes.takeFromDb('SELECT rowid as id, * FROM likes'));
   let userId;
   let name;
   let log = false;
+  let likes = 0;
+
   if (req.user) {
     userId = req.user.id;
     log = true;
     name = req.user.username;
+    likes = await control.User.countLikes(userId);
   }
   const notes = await control.Note.render(userId) || [];
   res.render('notes', {
     username: name,
     login: log,
+    like: likes,
     news: 'Тут будут новости',
     addClassNews: 'active',
     notes: notes.reverse(),
@@ -50,9 +41,15 @@ router.post('/like', middleware(), async (req, res, next) => {
   const {noteId} = req.body;
   const userId = req.user.id;
   if (await control.Like.create({noteId, userId})) {
-    res.status(200).json({status: true});
+    res.status(200).json({
+      status: true,
+      likesCount: await control.User.countLikes(userId),
+    });
   } else {
-    res.status(200).json({status: false});
+    res.status(200).json({
+      status: false,
+      likesCount: await control.User.countLikes(userId),
+    });
   }
 });
 

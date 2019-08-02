@@ -1,14 +1,15 @@
 const express = require('express');
 const middleware = require('../auth/middleware');
-
+const control = require('../mvc/control');
 const router = express.Router();
 const bodyParser = require('body-parser');
 
 const app = express();
 
-router.get('/', middleware(), (req, res, next) => {
+router.get('/', middleware(), async (req, res, next) => {
   res.render('index', {
     username: req.user.username,
+    like: await control.User.countLikes(req.user.id),
     login: true,
     title: 'Заметки',
     addClassMain: 'active',

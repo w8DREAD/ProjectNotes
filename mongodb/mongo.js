@@ -1,4 +1,4 @@
-const MongoClient = require('mongodb').MongoClient;
+const {MongoClient} = require('mongodb');
 
 const url = 'mongodb://localhost:27017/';
 const mongoClient = new MongoClient(url, { useNewUrlParser: true });
@@ -6,8 +6,8 @@ const handler = require('../mvc/model');
 
 
 async function users() {
-  const users = await handler.Users.takeFromDb();
-  const notes = await handler.Notes.takeFromDb();
+  const users = await handler.Users.takeFromDb('SELECT rowid AS id, * FROM users');
+  const notes = await handler.Notes.takeFromDb('SELECT rowid AS id, * FROM notes');
   console.log(notes);
 }
 

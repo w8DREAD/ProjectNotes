@@ -42,7 +42,7 @@ router.get('/logout', middleware(), (req, res) => {
 
 router.post('/login', passport.authenticate('local', {
   successRedirect: '/api/v1/notes',
-  failureRedirect: '/api/v1/register',
+  failureRedirect: '/api/v1/users/register',
 }));
 
 module.exports = router;

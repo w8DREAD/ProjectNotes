@@ -3,17 +3,6 @@ const sqlite = require('sqlite3').verbose();
 
 const openDb = () => Promise.resolve(new sqlite.Database('data.db'));
 
-// openDb()
-//   .then((db) => {
-//     db.serialize(() => {
-//       workWithTable(db, 'CREATE TABLE IF NOT EXISTS comments (text TEXT NOT NULL, author TEXT NOT NULL, noteId INTEGER NOT NULL, userId INTEGER NOT NULL)');
-//       workWithTable(db, 'CREATE TABLE IF NOT EXISTS notes (tag TEXT NOT NULL, text TEXT NOT NULL, author TEXT NO NULL, date TEXT NO NULL, userId INTEGER NOT NULL)');
-//       workWithTable(db, 'CREATE TABLE IF NOT EXISTS likes (noteId TEXT NOT NULL, userId TEXT NO NULL)');
-//       workWithTable(db, 'CREATE TABLE IF NOT EXISTS users (username TEXT NOT NULL, password TEXT NOT NULL, email TEXT NO NULL, telephone INTEGER NOT NULL, date TEXT)');
-//       closeDb(db);
-//     });
-//   });
-
 async function refreshComCount(db) {
   const notes = await selectFromTable(db, 'SELECT rowid AS id, * FROM notes');
   const comments = await selectFromTable(db, 'SELECT rowid AS id, * FROM comments');
@@ -29,7 +18,7 @@ async function refreshNotesCount(db) {
   const notes = await selectFromTable(db, 'SELECT rowid AS id, * FROM notes');
   for (const item of users) {
     const notesCount = notes.filter(note => note.userId === item.id);
-    workWithTable(db, 'UPDATE notes SET comCount = ? WHERE rowid = ?', [notesCount.length, item.id]);
+    workWithTable(db, 'UPDATE users SET notesCount = ? WHERE rowid = ?', [notesCount.length, item.id]);
   }
   return true;
 }
@@ -75,10 +64,10 @@ class Notes {
       .catch(reject => console.log(`Заметки: Ошибка работы с БД ---> ${reject.message}`));
   }
 
-  static takeFromDb() {
+  static takeFromDb(params) {
     return openDb()
       .then(async (db) => {
-        const result = await selectFromTable(db, 'SELECT rowid AS id, * FROM notes');
+        const result = await selectFromTable(db, params);
         closeDb(db);
         return result;
       })
@@ -140,10 +129,10 @@ class Comments {
       .catch(reject => console.log(`Комментарии: Ошибка работы с БД ---> ${reject.message}`));
   }
 
-  static takeFromDb() {
+  static takeFromDb(params) {
     return openDb()
       .then((db) => {
-        const result = selectFromTable(db, 'SELECT rowid AS id, * FROM comments');
+        const result = selectFromTable(db, params);
         closeDb(db);
         return result;
       })
@@ -176,10 +165,10 @@ class Likes {
     return openDb()
       .then(db => selectFromTable(db, 'SELECT rowid AS id, * FROM likes')
         .then((likes) => {
-          const userId = likes.filter(dbLike => +dbLike.userId === +like.userId
-            && +dbLike.noteId === +like.noteId);
-          if (userId.length) {
-            selectFromTable(db, `DELETE FROM likes WHERE noteId = ${like.noteId}`);
+          const likeDb = likes.filter(dbLike => +dbLike.userId === +like.userId
+              && +dbLike.noteId === +like.noteId);
+          if (likeDb.length) {
+            selectFromTable(db, `DELETE FROM likes WHERE rowid = ${likeDb[0].id}`);
             closeDb(db);
             return false;
           }
@@ -187,10 +176,10 @@ class Likes {
         }));
   }
 
-  static takeFromDb() {
+  static takeFromDb(params) {
     return openDb()
-      .then((db) => {
-        const result = selectFromTable(db, 'SELECT rowid AS id, * FROM likes');
+      .then(async (db) => {
+        const result = await selectFromTable(db, params);
         closeDb(db);
         return result;
       })
@@ -220,20 +209,10 @@ class Users {
       .catch(reject => console.log(`Комментарии: Ошибка работы с БД ---> ${reject.message}`));
   }
 
-  static takeFromDb() {
+  static takeFromDb(params) {
     return openDb()
       .then((db) => {
-        const result = selectFromTable(db, 'SELECT rowid AS id, * FROM users');
-        closeDb(db);
-        return result;
-      })
-      .catch(err => console.log(`Не удалось закрыть или прочитать БД---> ${err.message}`));
-  }
-
-  static find(params) {
-    return openDb()
-      .then(async (db) => {
-        const result = await selectFromTable(db, `SELECT rowid as id, * FROM users WHERE ${params}`);
+        const result = selectFromTable(db, params);
         closeDb(db);
         return result;
       })

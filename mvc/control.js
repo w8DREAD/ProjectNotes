@@ -1,4 +1,5 @@
 const handler = require('./model');
+const redis = require('../mongodb/redis');
 
 function formatDate() {
   const date = new Date();
@@ -32,14 +33,25 @@ class User {
   static async create(user) {
     const newUser = new User(user.username, user.password,
       user.email, user.telephone, user.dateBirthday);
-    const email = await handler.Users.find(`email = '${user.email}'`);
+    const email = await handler.Users.takeFromDb(`SELECT rowid as id, * FROM users WHERE '${user.email}'`);
     if (email[0]) {
       return false;
     }
     return handler.Users.pushInDb(newUser);
   }
-}
 
+  static async countLikes(userId) {
+    let result = 0;
+    const notes = await handler.Notes.takeFromDb(`SELECT rowid as id FROM notes WHERE userId = ${userId}`);
+    const likes = await handler.Likes.takeFromDb('SELECT * FROM likes');
+    for (const item of notes) {
+      const count = likes.filter(like => like.noteId === item.id);
+      result += count.length;
+    }
+    await redis.save('myLikes', result);
+    return redis.take('myLikes');
+  }
+}
 class Note {
   constructor(tag, text, author, userId) {
     this.userId = userId;
@@ -51,9 +63,9 @@ class Note {
   }
 
   static async render(userId) {
-    const notesFromDb = await handler.Notes.takeFromDb();
-    const commentsFromDb = await handler.Comments.takeFromDb();
-    const likesFromDb = await handler.Likes.takeFromDb();
+    const notesFromDb = await handler.Notes.takeFromDb('SELECT rowid AS id, * FROM notes');
+    const commentsFromDb = await handler.Comments.takeFromDb('SELECT rowid AS id, * FROM comments');
+    const likesFromDb = await handler.Likes.takeFromDb('SELECT rowid AS id, * FROM likes');
     const notes = notesFromDb.map((arg) => {
       const note = arg;
       const noteLikes = likesFromDb.filter(like => +like.noteId === note.id);
