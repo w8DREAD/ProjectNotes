@@ -15,11 +15,11 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  return db.addColumn('notes', 'comCount', { type: 'int' });
+  return db.addColumn('users', 'notesCount', { type: 'int' });
 };
 
 exports.down = function (db) {
-  return db.removeColumn('notes', 'comCount');
+  return db.removeColumn('users', 'notesCount');
 };
 
 exports._meta = {

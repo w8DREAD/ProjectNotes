@@ -11,8 +11,6 @@ async function users() {
   console.log(notes);
 }
 
-users();
-
 function qwe() {
   mongoClient.connect((err, client) => {
     const db = client.db('usersdb');

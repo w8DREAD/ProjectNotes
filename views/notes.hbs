@@ -1,5 +1,4 @@
 <h2 class="title">{{news}}</h2>
-
     {{#notes}}
 
         <form class="articles-news" name="news" id="post-{{id}}">
@@ -36,8 +35,6 @@
             </div>
 
 
-
-
         <div class="collapse" id="collapseExample-{{id}}">
             {{#comments}}
             <div class="articles-news comments">
@@ -50,16 +47,18 @@
                 <br>
                 <span aria-hidden="true" style="float: left; margin-top: 10px">Комментарий от: {{author}}</span>
             </div>
-
             {{/comments}}
-
+            {{#if ../login}}
             <div class="input-group add-notes" id="add-notes-{{id}}">
+
                 <div class="input-group-prepend">
                     <button class="input-group-text add-comments" type="button" name="{{id}}">Добавить</button>
                 </div>
                 <div type="tags" class="form-control" id="inputComment-{{id}}" placeholder="напиши комментарий" contenteditable="true"></div>
             </div>
+            {{/if}}
         </div>
+
             <div style="margin-top: 5px">
                     <span class="like" type="button" style="color: red" name="{{id}}">&heartsuit; <p style="float: right; margin-left: 5px" name={{id}}>{{likes}}</p></span>
             <a data-toggle="collapse" href="#collapseExample-{{id}}" role="button" aria-expanded="false"

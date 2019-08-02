@@ -1,5 +1,7 @@
 const express = require('express');
+const redis = require('redis');
 
+const client = redis.createClient();
 const router = express.Router();
 const bodyParser = require('body-parser');
 
@@ -13,6 +15,19 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 router.get('/', async (req, res, next) => {
+  // Прочтем записанное
+  client.get('myLikes', (err, repl) => {
+    if (err) {
+      console.log(`Что то случилось при чтении: ${err}`);
+    } else if (repl) {
+      // Ключ найден
+      console.log(`Ключ: ${repl}`);
+    } else {
+      // Ключ ненайден
+      console.log('Ключ ненайден.');
+    }
+    client.quit();
+  });
   let userId;
   let name;
   let log = false;
@@ -22,7 +37,6 @@ router.get('/', async (req, res, next) => {
     name = req.user.username;
   }
   const notes = await control.Note.render(userId) || [];
-  // console.log(notes);
   res.render('notes', {
     username: name,
     login: log,

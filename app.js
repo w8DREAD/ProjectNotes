@@ -18,7 +18,9 @@ const commentsRouter = require('./routes/comments');
 
 const app = express();
 
+
 require('./auth/passport')(app);
+require('./mongodb/redis');
 
 app
   .use(logger('dev'))

@@ -14,6 +14,26 @@ const openDb = () => Promise.resolve(new sqlite.Database('data.db'));
 //     });
 //   });
 
+async function refreshComCount(db) {
+  const notes = await selectFromTable(db, 'SELECT rowid AS id, * FROM notes');
+  const comments = await selectFromTable(db, 'SELECT rowid AS id, * FROM comments');
+  for (const item of notes) {
+    const comCount = comments.filter(comment => comment.noteId === item.id);
+    workWithTable(db, 'UPDATE notes SET comCount = ? WHERE rowid = ?', [comCount.length, item.id]);
+  }
+  return true;
+}
+
+async function refreshNotesCount(db) {
+  const users = await selectFromTable(db, 'SELECT rowid AS id, * FROM users');
+  const notes = await selectFromTable(db, 'SELECT rowid AS id, * FROM notes');
+  for (const item of users) {
+    const notesCount = notes.filter(note => note.userId === item.id);
+    workWithTable(db, 'UPDATE notes SET comCount = ? WHERE rowid = ?', [notesCount.length, item.id]);
+  }
+  return true;
+}
+
 function selectFromTable(db, setupTable) {
   return new Promise((resolve, reject) => {
     db.all(setupTable, (err, data) => {
@@ -46,8 +66,9 @@ function closeDb(db) {
 class Notes {
   static pushInDb(note) {
     return openDb()
-      .then((db) => {
-        workWithTable(db, 'INSERT INTO notes VALUES (?,?,?,?,?)', [note.tag, note.text, note.author, note.date, note.userId]);
+      .then(async (db) => {
+        await workWithTable(db, 'INSERT INTO notes VALUES (?,?,?,?,?,?)', [note.tag, note.text, note.author, note.date, note.userId, 0]);
+        await refreshNotesCount(db);
         closeDb(db);
         return true;
       })
@@ -56,8 +77,8 @@ class Notes {
 
   static takeFromDb() {
     return openDb()
-      .then((db) => {
-        const result = selectFromTable(db, 'SELECT rowid AS id, * FROM notes');
+      .then(async (db) => {
+        const result = await selectFromTable(db, 'SELECT rowid AS id, * FROM notes');
         closeDb(db);
         return result;
       })
@@ -66,8 +87,8 @@ class Notes {
 
   static deleteFromDb(id) {
     return openDb()
-      .then((db) => {
-        selectFromTable(db, `DELETE FROM notes WHERE rowid = ${id}`);
+      .then(async (db) => {
+        await selectFromTable(db, `DELETE FROM notes WHERE rowid = ${id}`);
         closeDb(db);
         return console.log('Удалено');
       })
@@ -76,8 +97,8 @@ class Notes {
 
   static editTextInDb(text, id) {
     openDb()
-      .then((db) => {
-        workWithTable(db, 'UPDATE notes SET text = ? WHERE rowid = ?', [text, id]);
+      .then(async (db) => {
+        await workWithTable(db, 'UPDATE notes SET text = ? WHERE rowid = ?', [text, id]);
         closeDb(db);
         return console.log('Отредактировано');
       })
@@ -86,8 +107,8 @@ class Notes {
 
   static editTagInDb(text, id) {
     openDb()
-      .then((db) => {
-        workWithTable(db, 'UPDATE notes SET tag = ? WHERE rowid = ?', [text, id]);
+      .then(async (db) => {
+        await workWithTable(db, 'UPDATE notes SET tag = ? WHERE rowid = ?', [text, id]);
         closeDb(db);
         return console.log('Отредактировано');
       })
@@ -109,9 +130,10 @@ async function run(queryfn) {
 class Comments {
   static pushInDb(comment) {
     return openDb()
-      .then((db) => {
-        workWithTable(db, 'INSERT INTO comments VALUES (?,?,?,?)', [comment.text, comment.author, comment.noteId, comment.userId]);
-        const result = selectFromTable(db, 'SELECT last_insert_rowid() AS id');
+      .then(async (db) => {
+        await workWithTable(db, 'INSERT INTO comments VALUES (?,?,?,?)', [comment.text, comment.author, comment.noteId, comment.userId]);
+        const result = await selectFromTable(db, 'SELECT last_insert_rowid() AS id');
+        await refreshComCount(db);
         closeDb(db);
         return result;
       })
@@ -154,7 +176,6 @@ class Likes {
     return openDb()
       .then(db => selectFromTable(db, 'SELECT rowid AS id, * FROM likes')
         .then((likes) => {
-          console.log(likes);
           const userId = likes.filter(dbLike => +dbLike.userId === +like.userId
             && +dbLike.noteId === +like.noteId);
           if (userId.length) {
@@ -191,7 +212,7 @@ class Users {
   static pushInDb(user) {
     return openDb()
       .then((db) => {
-        workWithTable(db, 'INSERT INTO users VALUES (?,?,?,?,?)', [user.username, user.password, user.email, user.telephone, user.dateBirthday]);
+        workWithTable(db, 'INSERT INTO users VALUES (?,?,?,?,?.?)', [user.username, user.password, user.email, user.telephone, user.dateBirthday, 0]);
         closeDb(db);
         console.log('User registered');
         return true;
