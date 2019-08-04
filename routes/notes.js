@@ -2,11 +2,10 @@ const express = require('express');
 
 const router = express.Router();
 const bodyParser = require('body-parser');
-const redis = require('../mongodb/redis');
+const schemes = require('../schemes');
 
 const app = express();
 const control = require('../mvc/control');
-const handler = require('../mvc/model');
 const middleware = require('../auth/middleware');
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -14,7 +13,6 @@ app.use(bodyParser.json());
 
 
 router.get('/', async (req, res, next) => {
-  console.log(await handler.Likes.takeFromDb('SELECT rowid as id, * FROM likes'));
   let userId;
   let name;
   let log = false;
@@ -38,7 +36,7 @@ router.get('/', async (req, res, next) => {
 });
 
 router.post('/like', middleware(), async (req, res, next) => {
-  const {noteId} = req.body;
+  const noteId = req.body;
   const userId = req.user.id;
   if (await control.Like.create({noteId, userId})) {
     res.status(200).json({
@@ -56,6 +54,10 @@ router.post('/like', middleware(), async (req, res, next) => {
 router.put('/:id', middleware(), async (req, res, next) => {
   const text = req.body;
   const {id} = req.params;
+  const valid = schemes.validator(schemes.editNote, text);
+  if (valid) {
+    return res.status(400).json(valid);
+  }
   await control.Note.edit(text, id);
   res.status(200);
 });

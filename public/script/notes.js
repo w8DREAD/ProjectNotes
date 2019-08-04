@@ -77,7 +77,10 @@ window.addEventListener('click', (target) => {
           tag.setAttribute('href', '');
           if (saveChange) {
             const editText = `tagText=${elemNote.innerText}`;
-            xhr('put', `notes/${idForDb}`, editText);
+            xhr('put', `notes/${idForDb}`, editText)
+              .catch(() => {
+                elemNote.innerText = tagText;
+              });
           } else {
             elemNote.innerText = tagText;
           }
@@ -106,11 +109,14 @@ window.addEventListener('click', (target) => {
         const elemNote = note;
         elemNote.onblur = function () {
           const saveChange = window.confirm('Сохранить изменения?');
-          elemNote.style.backgroundImage = '-webkit-radial-gradient(center, circle farthest-corner, #fff, #e2e2e2)';
+          elemNote.style.background = '';
           note.setAttribute('contenteditable', 'false');
           if (saveChange) {
             const editText = `noteText=${elemNote.innerText}`;
-            xhr('put', `notes/${idForDb}`, editText);
+            xhr('put', `notes/${idForDb}`, editText)
+              .catch(() => {
+                elemNote.innerText = noteText;
+              });
           } else {
             elemNote.innerText = noteText;
           }

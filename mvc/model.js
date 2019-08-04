@@ -201,7 +201,7 @@ class Users {
   static pushInDb(user) {
     return openDb()
       .then((db) => {
-        workWithTable(db, 'INSERT INTO users VALUES (?,?,?,?,?.?)', [user.username, user.password, user.email, user.telephone, user.dateBirthday, 0]);
+        workWithTable(db, 'INSERT INTO users VALUES (?,?,?,?,?,?)', [user.username, user.password, user.email, user.telephone, user.dateBirthday, 0]);
         closeDb(db);
         console.log('User registered');
         return true;
@@ -211,7 +211,7 @@ class Users {
 
   static takeFromDb(params) {
     return openDb()
-      .then((db) => {
+      .then(async (db) => {
         const result = selectFromTable(db, params);
         closeDb(db);
         return result;
