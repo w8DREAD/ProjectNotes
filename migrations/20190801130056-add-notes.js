@@ -1,5 +1,3 @@
-
-
 let dbm;
 let type;
 let seed;
@@ -18,7 +16,6 @@ exports.up = function (db) {
   return db.createTable('notes', {
     tag: 'string',
     text: 'string',
-    author: 'string',
     date: 'string',
     userId: 'int',
   });

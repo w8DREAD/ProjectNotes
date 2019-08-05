@@ -9,7 +9,7 @@ const app = express();
 router.get('/', middleware(), async (req, res, next) => {
   res.render('index', {
     username: req.user.username,
-    like: await control.User.countLikes(req.user.id),
+    like: await control.Like.takeRedis('myLikes'),
     login: true,
     title: 'Заметки',
     addClassMain: 'active',

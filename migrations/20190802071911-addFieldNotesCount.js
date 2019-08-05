@@ -1,5 +1,3 @@
-
-
 let dbm;
 let type;
 let seed;

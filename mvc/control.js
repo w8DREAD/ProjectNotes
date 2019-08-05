@@ -28,6 +28,7 @@ class User {
     this.email = email;
     this.telephone = telephone;
     this.dateBirthday = dateBirthday;
+    this.myLikes = 0;
   }
 
   static async create(user) {
@@ -41,17 +42,15 @@ class User {
   }
 
   static async countLikes(userId) {
-    let result = 0;
-    const notes = await handler.Notes.takeFromDb(`SELECT rowid as id FROM notes WHERE userId = ${userId}`);
-    const likes = await handler.Likes.takeFromDb('SELECT * FROM likes');
-    for (const item of notes) {
-      const count = likes.filter(like => like.noteId === item.id);
-      result += count.length;
-    }
-    await redis.save('myLikes', result);
-    return redis.take('myLikes');
+    redis.save('myLikes', await handler.Likes.countLikes(userId));
+    return true;
+  }
+
+  static async refreshLikeInDb(userId) {
+    return handler.Users.refreshLike(userId);
   }
 }
+
 class Note {
   constructor(tag, text, author, userId) {
     this.userId = userId;
@@ -63,6 +62,7 @@ class Note {
   }
 
   static async render(userId) {
+    console.log(await handler.Likes.raitingAllUsers());
     const notesFromDb = await handler.Notes.takeFromDb('SELECT rowid AS id, * FROM notes');
     const commentsFromDb = await handler.Comments.takeFromDb('SELECT rowid AS id, * FROM comments');
     const likesFromDb = await handler.Likes.takeFromDb('SELECT rowid AS id, * FROM likes');
@@ -73,26 +73,30 @@ class Note {
       note.comments = commentsFromDb.filter(comment => comment.noteId === note.id);
       return note;
     });
-    return notes.map((note) => {
+    for (const note of notes) {
+      let author = await handler.Users.takeFromDb(`SELECT username FROM users WHERE rowid = ${+note.userId}`);
+      note.author = author[0].username;
       if (note.userId === userId) {
         note.root = true;
-        const comments = note.comments.slice();
-        note.comments = comments.map((com) => {
-          com.root = true;
-          return com;
-        });
-        return note;
-      }
-      const comments = note.comments.slice();
-      note.comments = comments.map((com) => {
-        if (com.userId === userId) {
-          com.root = true;
-          return com;
+        if (note.comments.length) {
+          for (const comment of note.comments) {
+            author = await handler.Users.takeFromDb(`SELECT username FROM users WHERE rowid = ${+comment.userId}`);
+            comment.author = author[0].username;
+            comment.root = true;
+          }
         }
-        return com;
-      });
-      return note;
-    });
+      }
+      if (note.comments.length) {
+        for (const comment of note.comments) {
+          author = await handler.Users.takeFromDb(`SELECT username FROM users WHERE rowid = ${+comment.userId}`);
+          comment.author = author[0].username;
+          if (comment.userId === userId) {
+            comment.root = true;
+          }
+        }
+      }
+    }
+    return notes;
   }
 
   static create(data) {
@@ -145,13 +149,19 @@ class Like {
     const like = new Like(noteId, userId);
     if (await this.check(like)) {
       await handler.Likes.pushInDb(like);
+      await User.countLikes(userId);
       return true;
     }
+    await User.countLikes(userId);
     return false;
   }
 
   static check(like) {
     return handler.Likes.checkInDb(like);
+  }
+
+  static takeRedis(prop) {
+    return redis.take(prop);
   }
 }
 module.exports = {

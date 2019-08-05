@@ -1,5 +1,3 @@
-
-
 let dbm;
 let type;
 let seed;
@@ -21,6 +19,7 @@ exports.up = function (db) {
     email: 'string',
     date: 'string',
     telephone: 'int',
+    myLike: 'int',
   });
 };
 

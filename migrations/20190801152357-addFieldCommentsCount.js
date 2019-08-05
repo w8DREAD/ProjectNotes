@@ -1,5 +1,3 @@
-
-
 let dbm;
 let type;
 let seed;
@@ -19,7 +17,7 @@ exports.up = function (db) {
 };
 
 exports.down = function (db) {
-  return db.removeColumn('notes', 'comCount');
+  db.removeColumn('notes', 'comCount');
 };
 
 exports._meta = {

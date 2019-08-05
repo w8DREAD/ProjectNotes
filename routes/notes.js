@@ -22,7 +22,8 @@ router.get('/', async (req, res, next) => {
     userId = req.user.id;
     log = true;
     name = req.user.username;
-    likes = await control.User.countLikes(userId);
+    await control.User.countLikes(userId);
+    likes = await control.Like.takeRedis('myLikes');
   }
   const notes = await control.Note.render(userId) || [];
   res.render('notes', {
@@ -36,19 +37,20 @@ router.get('/', async (req, res, next) => {
 });
 
 router.post('/like', middleware(), async (req, res, next) => {
-  const noteId = req.body;
+  const {noteId} = req.body;
   const userId = req.user.id;
   if (await control.Like.create({noteId, userId})) {
     res.status(200).json({
       status: true,
-      likesCount: await control.User.countLikes(userId),
+      likesCount: await control.Like.takeRedis('myLikes'),
     });
   } else {
     res.status(200).json({
       status: false,
-      likesCount: await control.User.countLikes(userId),
+      likesCount: await control.Like.takeRedis('myLikes'),
     });
   }
+  await control.User.refreshLikeInDb(userId);
 });
 
 router.put('/:id', middleware(), async (req, res, next) => {

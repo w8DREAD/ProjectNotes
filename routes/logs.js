@@ -7,7 +7,7 @@ const control = require('../mvc/control');
 router.get('/', middleware(), async (req, res, next) => {
   res.render('logs', {
     username: req.user.username,
-    like: await control.User.countLikes(req.user.id),
+    like: await control.Like.takeRedis('myLikes'),
     login: true,
     addClassLogs: 'active',
   });

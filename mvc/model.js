@@ -1,7 +1,22 @@
 const sqlite = require('sqlite3').verbose();
+const redis = require('../mongodb/redis');
+const mongo = require('../mongodb/mongo');
 
 
 const openDb = () => Promise.resolve(new sqlite.Database('data.db'));
+
+async function run(queryfn) {
+  const db = await openDb();
+  const res = await queryfn(db);
+  closeDb(db);
+  return res;
+}
+
+class Db {
+  static async takeFromDb(params) {
+    return run(db => selectFromTable(db, params));
+  }
+}
 
 async function refreshComCount(db) {
   const notes = await selectFromTable(db, 'SELECT rowid AS id, * FROM notes');
@@ -52,171 +67,109 @@ function closeDb(db) {
   return console.log('Close the database connection.');
 }
 
-class Notes {
-  static pushInDb(note) {
-    return openDb()
-      .then(async (db) => {
-        await workWithTable(db, 'INSERT INTO notes VALUES (?,?,?,?,?,?)', [note.tag, note.text, note.author, note.date, note.userId, 0]);
-        await refreshNotesCount(db);
-        closeDb(db);
-        return true;
-      })
-      .catch(reject => console.log(`Заметки: Ошибка работы с БД ---> ${reject.message}`));
-  }
-
-  static takeFromDb(params) {
-    return openDb()
-      .then(async (db) => {
-        const result = await selectFromTable(db, params);
-        closeDb(db);
-        return result;
-      })
-      .catch(err => console.log(`Не удалось закрыть или прочитать БД---> ${err.message}`));
+class Notes extends Db {
+  static async pushInDb(note) {
+    await run(db => workWithTable(db, 'INSERT INTO notes VALUES (?,?,?,?,?)', [note.tag, note.text, note.date, note.userId, 0]));
+    return run(db => refreshNotesCount(db));
   }
 
   static deleteFromDb(id) {
-    return openDb()
-      .then(async (db) => {
-        await selectFromTable(db, `DELETE FROM notes WHERE rowid = ${id}`);
-        closeDb(db);
-        return console.log('Удалено');
-      })
-      .catch(err => console.log(`Упс! Что-то пошло не так ---> ${err.message}`));
+    return run(db => selectFromTable(db, `DELETE FROM notes WHERE rowid = ${id}`));
   }
 
   static editTextInDb(text, id) {
-    openDb()
-      .then(async (db) => {
-        await workWithTable(db, 'UPDATE notes SET text = ? WHERE rowid = ?', [text, id]);
-        closeDb(db);
-        return console.log('Отредактировано');
-      })
-      .catch(err => console.log(`Упс! Не отредактировал ---> ${err.message}`));
+    return run(db => workWithTable(db, 'UPDATE notes SET text = ? WHERE rowid = ?', [text, id]));
   }
 
   static editTagInDb(text, id) {
-    openDb()
-      .then(async (db) => {
-        await workWithTable(db, 'UPDATE notes SET tag = ? WHERE rowid = ?', [text, id]);
-        closeDb(db);
-        return console.log('Отредактировано');
-      })
-      .catch(err => console.log(`Упс! Не отредактировал ---> ${err.message}`));
-  }
-
-  static editTagInDbff(text, id) {
     return run(db => workWithTable(db, 'UPDATE notes SET tag = ? WHERE rowid = ?', [text, id]));
   }
 }
 
-async function run(queryfn) {
-  const db = await openDb();
-  const res = await queryfn(db);
-  closeDb(db);
-  return res;
-}
-
-class Comments {
-  static pushInDb(comment) {
-    return openDb()
-      .then(async (db) => {
-        await workWithTable(db, 'INSERT INTO comments VALUES (?,?,?,?)', [comment.text, comment.author, comment.noteId, comment.userId]);
-        const result = await selectFromTable(db, 'SELECT last_insert_rowid() AS id');
-        await refreshComCount(db);
-        closeDb(db);
-        return result;
-      })
-      .catch(reject => console.log(`Комментарии: Ошибка работы с БД ---> ${reject.message}`));
-  }
-
-  static takeFromDb(params) {
-    return openDb()
-      .then((db) => {
-        const result = selectFromTable(db, params);
-        closeDb(db);
-        return result;
-      })
-      .catch(err => console.log(`Не удалось закрыть или прочитать БД---> ${err.message}`));
+class Comments extends Db {
+  static async pushInDb(comment) {
+    await run(db => workWithTable(db, 'INSERT INTO comments VALUES (?,?,?)', [comment.text, comment.noteId, comment.userId]));
+    await run(db => refreshComCount(db));
+    return run(db => selectFromTable(db, 'SELECT last_insert_rowid() AS id'));
   }
 
   static deleteFromDb(field, id) {
-    return openDb()
-      .then((db) => {
-        selectFromTable(db, `DELETE FROM comments WHERE ${field} = ${id}`);
-        closeDb(db);
-        return console.log('Удалено');
-      })
-      .catch(err => console.log(`Упс! Что-то пошло не так ---> ${err.message}`));
+    return run(db => selectFromTable(db, `DELETE FROM comments WHERE ${field} = ${id}`));
   }
 }
 
-class Likes {
+class Likes extends Db {
   static pushInDb(like) {
-    return openDb()
-      .then((db) => {
-        workWithTable(db, 'INSERT INTO likes VALUES (?,?)', [like.noteId, like.userId]);
-        closeDb(db);
-        return console.log('Push comment in Db');
-      })
-      .catch(reject => console.log(`Комментарии: Ошибка работы с БД ---> ${reject.message}`));
+    return run(db => workWithTable(db, 'INSERT INTO likes VALUES (?,?)', [like.noteId, like.userId]));
   }
 
-  static checkInDb(like) {
-    return openDb()
-      .then(db => selectFromTable(db, 'SELECT rowid AS id, * FROM likes')
-        .then((likes) => {
-          const likeDb = likes.filter(dbLike => +dbLike.userId === +like.userId
+  static async checkInDb(like) {
+    const likes = await run(db => selectFromTable(db, 'SELECT rowid AS id, * FROM likes'));
+    const likeDb = likes.filter(dbLike => +dbLike.userId === +like.userId
               && +dbLike.noteId === +like.noteId);
-          if (likeDb.length) {
-            selectFromTable(db, `DELETE FROM likes WHERE rowid = ${likeDb[0].id}`);
-            closeDb(db);
-            return false;
-          }
-          return true;
-        }));
+    if (likeDb.length) {
+      await run(db => selectFromTable(db, `DELETE FROM likes WHERE rowid = ${likeDb[0].id}`));
+      return false;
+    }
+    return true;
   }
 
-  static takeFromDb(params) {
-    return openDb()
-      .then(async (db) => {
-        const result = await selectFromTable(db, params);
-        closeDb(db);
-        return result;
-      })
-      .catch(err => console.log(`Не удалось закрыть или прочитать БД---> ${err.message}`));
+  static async countLikes(userId) {
+    let result = 0;
+    const notes = await run(db => selectFromTable(db, `SELECT rowid AS id FROM notes WHERE userId = ${userId}`));
+    const likes = await run(db => selectFromTable(db, 'SELECT * FROM likes'));
+    for (const item of notes) {
+      const count = likes.filter(like => like.noteId === item.id);
+      result += count.length;
+    }
+    return result;
+  }
+
+  static async raitingAllUsers(num = 0) {
+    const result = [];
+    let notes = [];
+    const usersWithLikes = [];
+    if (num) {
+      const fromDb = await run(db => selectFromTable(db, 'SELECT rowid AS id, * FROM notes'));
+      notes = fromDb.reverse().splice(0, num);
+    } else {
+      notes = await run(db => selectFromTable(db, 'SELECT rowid AS id, * FROM notes'));
+    }
+
+    const users = await run(db => selectFromTable(db, 'SELECT rowid AS id, * FROM users'));
+    for (const user of users) {
+      let likes = 0;
+      for (const note of notes) {
+        if (+note.userId === +user.id) {
+          const like = await run(db => selectFromTable(db, `SELECT * FROM likes WHERE noteId = ${+note.id}`));
+          likes += like.length;
+        }
+      }
+      result.push(likes);
+      user.myLike = likes;
+      usersWithLikes.push(user);
+    }
+    const maxLikes = Math.max.apply(null, result);
+    for (const user of usersWithLikes) {
+      user.raiting = Math.round((user.myLike / maxLikes) * 100);
+    }
+    mongo.save('usersdb', 'users', usersWithLikes);
+    return usersWithLikes;
   }
 
   static deleteFromDb(id) {
-    return openDb()
-      .then((db) => {
-        selectFromTable(db, `DELETE FROM likes WHERE noteId = ${id}`);
-        closeDb(db);
-        return console.log('Удалено');
-      })
-      .catch(err => console.log(`Упс! Что-то пошло не так ---> ${err.message}`));
+    return run(db => selectFromTable(db, `DELETE FROM likes WHERE noteId = ${id}`));
   }
 }
 
-class Users {
+class Users extends Db {
   static pushInDb(user) {
-    return openDb()
-      .then((db) => {
-        workWithTable(db, 'INSERT INTO users VALUES (?,?,?,?,?,?)', [user.username, user.password, user.email, user.telephone, user.dateBirthday, 0]);
-        closeDb(db);
-        console.log('User registered');
-        return true;
-      })
-      .catch(reject => console.log(`Комментарии: Ошибка работы с БД ---> ${reject.message}`));
+    return run(db => workWithTable(db, 'INSERT INTO users VALUES (?,?,?,?,?,?,?)', [user.username, user.password, user.email, user.telephone, user.dateBirthday, 0, 0]));
   }
 
-  static takeFromDb(params) {
-    return openDb()
-      .then(async (db) => {
-        const result = selectFromTable(db, params);
-        closeDb(db);
-        return result;
-      })
-      .catch(err => console.log(`Не удалось закрыть или прочитать БД---> ${err.message}`));
+  static async refreshLike(userId) {
+    const likes = await Likes.countLikes(userId);
+    return run(db => workWithTable(db, 'UPDATE users SET myLike = ? WHERE rowid = ?', [likes, userId]));
   }
 }
 module.exports = {
