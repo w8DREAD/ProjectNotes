@@ -1,31 +1,46 @@
-const {MongoClient} = require('mongodb');
+const MongoClient = require('mongodb').MongoClient;
 
 const url = 'mongodb://localhost:27017/';
 const mongoClient = new MongoClient(url, { useNewUrlParser: true });
 
 
-async function take(db, collection) {
-  mongoClient.connect((err, client) => {
-    const mongodb = client.db(db);
-    const mongoCollection = mongodb.collection(collection);
-    if (err) return console.log(err);
+const dbo = new Promise((resolve, reject) => {
+  mongoClient.connect((err, dbo) => {
+    if (err) reject(err);
+    resolve(dbo.db('usersdb'));
+  });
+});
 
-    return mongoCollection.find().toArray((err, results) => {
-      client.close();
-      return results;
-    });
+const take = (collection, findKey) => new Promise(async (resolve, reject) => {
+  const db = await dbo;
+  const mySort = { raiting: -1 };
+  db.collection(collection).find(findKey).sort(mySort).toArray((err, res) => {
+    if (err) reject(err);
+    resolve(res);
+  });
+});
+
+
+async function save(collection, data) {
+  const db = await dbo;
+  db.collection(collection).insert(data, (err, res) => {
+    if (err) throw err;
   });
 }
 
-async function save(db, collection, data) {
-  mongoClient.connect((err, client) => {
-    const mongodb = client.db(db);
-    const mongoCollection = mongodb.collection(collection);
-    if (err) return console.log(err);
-
-    return mongoCollection.insertMany(data, (err, results) => {
-      client.close();
-    });
+const update = (collection, where, newValue) => new Promise(async (resolve, reject) => {
+  const db = await dbo;
+  db.collection(collection).updateOne(where, { $set: newValue }, (err, res) => {
+    if (err) reject(err);
+    resolve(res);
   });
+});
+
+async function drop(collection) {
+  const db = await dbo;
+  db.collection(collection).drop();
 }
-module.exports = {take, save};
+
+module.exports = {
+  take, save, update, drop,
+};

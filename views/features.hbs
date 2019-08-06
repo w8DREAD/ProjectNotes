@@ -1,4 +1,12 @@
+<h2>My tags:</h2>
+    <p style="font-size: 18px; color: blue">My tags: {{myTags}}</p>
+<h2>{{myLastTag}}</h2>
+<p style="font-size: 18px; color: darkgoldenrod">My last tags: {{lastTags}}</p>
 <h2>{{features}}</h2>
 {{#users}}
-    <p>{{username}} is has raiting {{raiting}}</p>
+    <p style="font-size: 18px; color: red">{{username}} is has raiting {{raiting}}</p>
 {{/users}}
+<h2>{{features2}}</h2>
+{{#last10}}
+    <p style="font-size: 18px; color: green">{{username}} is has raiting {{raiting}}</p>
+{{/last10}}

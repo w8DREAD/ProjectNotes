@@ -1,5 +1,4 @@
 const sqlite = require('sqlite3').verbose();
-const redis = require('../mongodb/redis');
 const mongo = require('../mongodb/mongo');
 
 
@@ -64,7 +63,6 @@ function workWithTable(db, setupTable, data) {
 
 function closeDb(db) {
   db.close();
-  return console.log('Close the database connection.');
 }
 
 class Notes extends Db {
@@ -151,9 +149,9 @@ class Likes extends Db {
     }
     const maxLikes = Math.max.apply(null, result);
     for (const user of usersWithLikes) {
-      user.raiting = Math.round((user.myLike / maxLikes) * 100);
+      user.raiting = Math.round((user.myLike / maxLikes) * 100) || 0;
+      await mongo.update('users', {email: user.email}, user);
     }
-    mongo.save('usersdb', 'users', usersWithLikes);
     return usersWithLikes;
   }
 
@@ -164,12 +162,29 @@ class Likes extends Db {
 
 class Users extends Db {
   static pushInDb(user) {
+    mongo.save('users', user);
     return run(db => workWithTable(db, 'INSERT INTO users VALUES (?,?,?,?,?,?,?)', [user.username, user.password, user.email, user.telephone, user.dateBirthday, 0, 0]));
   }
 
   static async refreshLike(userId) {
     const likes = await Likes.countLikes(userId);
     return run(db => workWithTable(db, 'UPDATE users SET myLike = ? WHERE rowid = ?', [likes, userId]));
+  }
+
+  static giveNote(userId) {
+    return run(db => selectFromTable(db, `SELECT * FROM notes WHERE userId = ${userId}`));
+  }
+
+  static async giveTags(userId, num = 0) {
+    const tags = [];
+    const notes = await this.giveNote(userId);
+    for (const note of notes) {
+      tags.push(note.tag);
+    }
+    if (num) {
+      return tags.reverse().splice(0, num);
+    }
+    return tags.reverse();
   }
 }
 module.exports = {

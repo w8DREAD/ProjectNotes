@@ -8,7 +8,7 @@ const middleware = require('../auth/middleware');
 router.get('/', middleware(), async (req, res, next) => {
   res.render('addNotes', {
     login: true,
-    like: await control.Like.takeRedis('myLikes'),
+    like: await control.Like.takeRedis('myLike'),
     username: req.user.username,
   });
 });

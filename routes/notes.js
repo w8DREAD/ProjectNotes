@@ -23,7 +23,7 @@ router.get('/', async (req, res, next) => {
     log = true;
     name = req.user.username;
     await control.User.countLikes(userId);
-    likes = await control.Like.takeRedis('myLikes');
+    likes = await control.Like.takeRedis('myLike');
   }
   const notes = await control.Note.render(userId) || [];
   res.render('notes', {
@@ -42,12 +42,12 @@ router.post('/like', middleware(), async (req, res, next) => {
   if (await control.Like.create({noteId, userId})) {
     res.status(200).json({
       status: true,
-      likesCount: await control.Like.takeRedis('myLikes'),
+      likesCount: await control.Like.takeRedis('myLike'),
     });
   } else {
     res.status(200).json({
       status: false,
-      likesCount: await control.Like.takeRedis('myLikes'),
+      likesCount: await control.Like.takeRedis('myLike'),
     });
   }
   await control.User.refreshLikeInDb(userId);

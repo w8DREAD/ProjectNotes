@@ -1,6 +1,12 @@
 const handler = require('./model');
 const redis = require('../mongodb/redis');
 
+const arr = [8, 7, 6, 5, 4, 3, 2, 1, 0];
+setInterval(() => {
+  arr.splice(0, 1);
+  console.log(arr);
+}, 10000000);
+
 function formatDate() {
   const date = new Date();
   let dd = date.getDate();
@@ -28,7 +34,22 @@ class User {
     this.email = email;
     this.telephone = telephone;
     this.dateBirthday = dateBirthday;
-    this.myLikes = 0;
+    this.myLike = 0;
+  }
+
+  static async activity() {
+    const users = await handler.Users.takeFromDb('SELECT rowid AS id, * FROM users');
+
+    for (const user of users) {
+      const comments = await handler.Comments.takeFromDb(`SELECT rowid AS id FROM comments WHERE userId = ${user.id}`);
+      const notes = await handler.Notes.takeFromDb(`SELECT rowid AS id FROM notes WHERE userId = ${user.id}`);
+      user.activity = comments.length + notes.length;
+    }
+    console.log(users);
+  }
+
+  static async giveTags(userId, num) {
+    return handler.Users.giveTags(userId, num);
   }
 
   static async create(user) {
@@ -42,7 +63,7 @@ class User {
   }
 
   static async countLikes(userId) {
-    redis.save('myLikes', await handler.Likes.countLikes(userId));
+    redis.save('myLike', await handler.Likes.countLikes(userId));
     return true;
   }
 
@@ -58,11 +79,10 @@ class Note {
     this.text = text;
     this.author = author;
     this.date = formatDate();
-    this.likes = 0;
+    this.like = 0;
   }
 
   static async render(userId) {
-    console.log(await handler.Likes.raitingAllUsers());
     const notesFromDb = await handler.Notes.takeFromDb('SELECT rowid AS id, * FROM notes');
     const commentsFromDb = await handler.Comments.takeFromDb('SELECT rowid AS id, * FROM comments');
     const likesFromDb = await handler.Likes.takeFromDb('SELECT rowid AS id, * FROM likes');
@@ -154,6 +174,10 @@ class Like {
     }
     await User.countLikes(userId);
     return false;
+  }
+
+  static async raiting(latestNote) {
+    return handler.Likes.raitingAllUsers(latestNote);
   }
 
   static check(like) {
