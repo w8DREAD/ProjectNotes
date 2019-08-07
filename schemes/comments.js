@@ -12,9 +12,6 @@ module.exports = {
     id: {
       type: 'number',
     },
-    author: {
-      type: 'string',
-    },
   },
-  required: ['text', 'id', 'userId', 'author'],
+  required: ['text', 'id', 'userId'],
 };

@@ -1,11 +1,10 @@
 const handler = require('./model');
 const redis = require('../mongodb/redis');
 
-const arr = [8, 7, 6, 5, 4, 3, 2, 1, 0];
-setInterval(() => {
-  arr.splice(0, 1);
-  console.log(arr);
-}, 10000000);
+const statistics = [];
+setInterval(async () => {
+  statistics.splice(0, 1);
+}, 25000);
 
 function formatDate() {
   const date = new Date();
@@ -39,13 +38,15 @@ class User {
 
   static async activity() {
     const users = await handler.Users.takeFromDb('SELECT rowid AS id, * FROM users');
-
     for (const user of users) {
-      const comments = await handler.Comments.takeFromDb(`SELECT rowid AS id FROM comments WHERE userId = ${user.id}`);
-      const notes = await handler.Notes.takeFromDb(`SELECT rowid AS id FROM notes WHERE userId = ${user.id}`);
-      user.activity = comments.length + notes.length;
+      user.activity = 1;
+      for (const userId of statistics) {
+        if (userId === user.id) user.activity += 1;
+      }
+      const activity = user.activity - 1;
+      user.activity = Math.round((activity / user.activity) * 100) / 100;
     }
-    console.log(users);
+    return users;
   }
 
   static async giveTags(userId, num) {
@@ -73,11 +74,10 @@ class User {
 }
 
 class Note {
-  constructor(tag, text, author, userId) {
+  constructor(tag, text, userId) {
     this.userId = userId;
     this.tag = tag;
     this.text = text;
-    this.author = author;
     this.date = formatDate();
     this.like = 0;
   }
@@ -95,6 +95,7 @@ class Note {
     });
     for (const note of notes) {
       let author = await handler.Users.takeFromDb(`SELECT username FROM users WHERE rowid = ${+note.userId}`);
+      console.log(note);
       note.author = author[0].username;
       if (note.userId === userId) {
         note.root = true;
@@ -120,7 +121,8 @@ class Note {
   }
 
   static create(data) {
-    const note = new Note(data.tagText, data.noteText, data.author, data.userId);
+    const note = new Note(data.tagText, data.noteText, data.userId);
+    statistics.unshift(data.userId);
     return handler.Notes.pushInDb(note);
   }
 
@@ -141,16 +143,15 @@ class Note {
 }
 
 class Comment {
-  constructor(noteId, text, author, userId) {
+  constructor(noteId, text, userId) {
     this.userId = userId;
     this.noteId = noteId;
     this.text = text;
-    this.author = author;
   }
 
   static create(dataComment) {
-    const comment = new Comment(dataComment.id, dataComment.text,
-      dataComment.author, dataComment.userId);
+    const comment = new Comment(dataComment.id, dataComment.text, dataComment.userId);
+    statistics.unshift(dataComment.userId);
     return handler.Comments.pushInDb(comment);
   }
 

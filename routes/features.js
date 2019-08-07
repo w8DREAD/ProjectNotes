@@ -16,6 +16,7 @@ router.get('/', middleware(), async (req, res, next) => {
   const last10 = await mongo.take('users');
   const myTags = await control.User.giveTags(userId);
   const lastTags = await control.User.giveTags(userId, num);
+  console.log(await control.User.activity());
   res.render('features', {
     username: req.user.username,
     login: true,
@@ -28,6 +29,7 @@ router.get('/', middleware(), async (req, res, next) => {
     last10,
     myTags,
     lastTags,
+    activityUsers: await control.User.activity(),
   });
 });
 

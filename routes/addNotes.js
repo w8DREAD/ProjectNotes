@@ -18,7 +18,6 @@ router.post('/', middleware(), async (req, res, next) => {
     tagText: req.body.tagText,
     noteText: req.body.noteText,
     userId: req.user.id,
-    author: req.user.username,
   };
   const valid = schemes.validator(schemes.notes, note);
   if (valid) {

@@ -9,7 +9,7 @@ const mongo = require('../mongodb/mongo');
 const app = express();
 
 router.get('/', middleware(), async (req, res, next) => {
-  // mongo.drop('users');
+  // await control.Note.delete(14);
   res.render('index', {
     username: req.user.username,
     like: await control.Like.takeRedis('myLike'),

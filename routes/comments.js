@@ -15,7 +15,6 @@ router.post('/create', middleware(), async (req, res, next) => {
   const comment = {
     text: req.body.text,
     id: +req.body.id,
-    author: req.user.username,
     userId: +req.user.id,
   };
   const valid = schema.validator(schema.comments, comment);
@@ -23,7 +22,7 @@ router.post('/create', middleware(), async (req, res, next) => {
     return res.status(400).json(valid);
   }
   const commentId = await control.Comment.create(comment);
-  res.status(200).json({author: comment.author, id: commentId[0].id});
+  res.status(200).json({author: req.user.username, id: commentId[0].id});
 });
 
 router.delete('/:id', middleware(), async (req, res, next) => {

@@ -14,9 +14,6 @@ module.exports = {
     userId: {
       type: 'number',
     },
-    author: {
-      type: 'string',
-    },
   },
-  required: ['tagText', 'noteText', 'userId', 'author'],
+  required: ['tagText', 'noteText', 'userId'],
 };
