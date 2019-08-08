@@ -17,7 +17,13 @@ exports.up = function (db) {
 };
 
 exports.down = function (db) {
-  db.removeColumn('notes', 'comCount');
+  db.dropTable('notes');
+  return db.createTable('notes', {
+    tag: 'string',
+    text: 'string',
+    date: 'string',
+    userId: 'int',
+  });
 };
 
 exports._meta = {

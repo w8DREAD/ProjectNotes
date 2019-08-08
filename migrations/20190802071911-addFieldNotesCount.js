@@ -17,7 +17,15 @@ exports.up = function (db) {
 };
 
 exports.down = function (db) {
-  return db.removeColumn('users', 'notesCount');
+  db.dropTable('users');
+  return db.createTable('users', {
+    username: 'string',
+    password: 'string',
+    email: 'string',
+    date: 'string',
+    telephone: 'int',
+    myLike: 'int',
+  });
 };
 
 exports._meta = {
