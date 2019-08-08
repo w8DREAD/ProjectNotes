@@ -11,29 +11,17 @@ const middleware = require('../auth/middleware');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-
-router.get('/', async (req, res, next) => {
-  let userId;
-  let name;
-  let log = false;
-  let likes = 0;
-
-  if (req.user) {
-    userId = req.user.id;
-    log = true;
-    name = req.user.username;
-    await control.User.countLikes(userId);
-    likes = await control.Like.takeRedis('myLike');
+router.post('/', middleware(), async (req, res, next) => {
+  const note = {
+    text: req.body.text,
+    userId: req.user.id,
+  };
+  const valid = schemes.validator(schemes.notes, note);
+  if (!valid) {
+    return res.status(400).json(valid);
   }
-  const notes = await control.Note.render(userId) || [];
-  res.render('notes', {
-    username: name,
-    login: log,
-    like: likes,
-    news: 'Тут будут новости',
-    addClassNews: 'active',
-    notes: notes.reverse(),
-  });
+  await control.Note.create(note);
+  res.redirect('/pageNotes');
 });
 
 router.post('/like', middleware(), async (req, res, next) => {

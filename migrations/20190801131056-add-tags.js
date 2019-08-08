@@ -1,3 +1,5 @@
+
+
 let dbm;
 let type;
 let seed;
@@ -13,15 +15,14 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  return db.createTable('notes', {
+  return db.createTable('tags', {
     text: 'string',
-    date: 'string',
-    userId: 'int',
+    noteId: 'int',
   });
 };
 
 exports.down = function (db) {
-  return db.dropTable('notes');
+  return db.dropTable('tags');
 };
 
 exports._meta = {

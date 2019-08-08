@@ -1,12 +1,7 @@
 module.exports = {
   type: 'object',
   properties: {
-    tagText: {
-      type: 'string',
-      minLength: 3,
-      maxLength: 30,
-    },
-    noteText: {
+    text: {
       type: 'string',
       minLength: 3,
       maxLength: 500,
@@ -15,5 +10,5 @@ module.exports = {
       type: 'number',
     },
   },
-  required: ['tagText', 'noteText', 'userId'],
+  required: ['tag', 'text', 'userId'],
 };

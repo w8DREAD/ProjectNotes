@@ -6,25 +6,11 @@ const schemes = require('../schemes');
 const middleware = require('../auth/middleware');
 
 router.get('/', middleware(), async (req, res, next) => {
-  res.render('addNotes', {
+  res.render('addNote', {
     login: true,
     like: await control.Like.takeRedis('myLike'),
     username: req.user.username,
   });
-});
-
-router.post('/', middleware(), async (req, res, next) => {
-  const note = {
-    tagText: req.body.tagText,
-    noteText: req.body.noteText,
-    userId: req.user.id,
-  };
-  const valid = schemes.validator(schemes.notes, note);
-  if (valid) {
-    return res.status(400).json(valid);
-  }
-  await control.Note.create(note);
-  res.redirect('/api/v1/notes');
 });
 
 

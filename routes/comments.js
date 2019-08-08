@@ -11,7 +11,7 @@ const middleware = require('../auth/middleware');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-router.post('/create', middleware(), async (req, res, next) => {
+router.post('/', middleware(), async (req, res, next) => {
   const comment = {
     text: req.body.text,
     id: +req.body.id,

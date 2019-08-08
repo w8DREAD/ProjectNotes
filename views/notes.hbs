@@ -3,7 +3,9 @@
 
         <form class="articles-news" name="news" id="post-{{id}}">
             <div style="margin-top: 15px">
-                <p>
+                <p><button type="submit" class="close button tags" data-dismiss="alert" aria-label="Close" style="float: left">
+                    <span aria-hidden="true" id="add-tags-{{id}}" name={{id}}>+</span>
+                </button>
                     {{#if root}}
                     <button type="submit" class="close button notes" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true" id="delete-notes-{{id}}" name={{id}}>&times;</span>
@@ -16,7 +18,9 @@
                 <span aria-hidden="true" id="edit-tag-{{id}}" name={{id}}>&nbsp✎</span>
                 </button>
                     {{/if}}
+                    {{#tags}}
                 <a id="tag-{{id}}" href="">{{tag}}</a>
+                    {{/tags}}
                     </div>
 
                 </p>

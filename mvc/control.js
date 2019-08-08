@@ -74,55 +74,54 @@ class User {
 }
 
 class Note {
-  constructor(tag, text, userId) {
+  constructor(text, userId) {
     this.userId = userId;
-    this.tag = tag;
     this.text = text;
     this.date = formatDate();
     this.like = 0;
   }
 
-  static async render(userId) {
+  static async pageNotes(userId) {
     const notesFromDb = await handler.Notes.takeFromDb('SELECT rowid AS id, * FROM notes');
-    const commentsFromDb = await handler.Comments.takeFromDb('SELECT rowid AS id, * FROM comments');
-    const likesFromDb = await handler.Likes.takeFromDb('SELECT rowid AS id, * FROM likes');
-    const notes = notesFromDb.map((arg) => {
-      const note = arg;
-      const noteLikes = likesFromDb.filter(like => +like.noteId === note.id);
-      note.likes = noteLikes.length;
-      note.comments = commentsFromDb.filter(comment => comment.noteId === note.id);
-      return note;
-    });
-    for (const note of notes) {
-      let author = await handler.Users.takeFromDb(`SELECT username FROM users WHERE rowid = ${+note.userId}`);
-      console.log(note);
-      note.author = author[0].username;
-      if (note.userId === userId) {
-        note.root = true;
-        if (note.comments.length) {
-          for (const comment of note.comments) {
-            author = await handler.Users.takeFromDb(`SELECT username FROM users WHERE rowid = ${+comment.userId}`);
-            comment.author = author[0].username;
-            comment.root = true;
-          }
-        }
-      }
-      if (note.comments.length) {
-        for (const comment of note.comments) {
-          author = await handler.Users.takeFromDb(`SELECT username FROM users WHERE rowid = ${+comment.userId}`);
-          comment.author = author[0].username;
-          if (comment.userId === userId) {
-            comment.root = true;
-          }
-        }
-      }
-    }
-    return notes;
+    return notesFromDb;
+    // const commentsFromDb = await handler.Comments.takeFromDb('SELECT rowid AS id, * FROM comments');
+    // const likesFromDb = await handler.Likes.takeFromDb('SELECT rowid AS id, * FROM likes');
+    // const notes = notesFromDb.map((arg) => {
+    //   const note = arg;
+    //   const noteLikes = likesFromDb.filter(like => +like.noteId === note.id);
+    //   note.likes = noteLikes.length;
+    //   note.comments = commentsFromDb.filter(comment => comment.noteId === note.id);
+    //   return note;
+    // });
+    // for (const note of notes) {
+    //   let author = await handler.Users.takeFromDb(`SELECT username FROM users WHERE rowid = ${+note.userId}`);
+    //   console.log(note);
+    //   note.author = author[0].username;
+    //   if (note.userId === userId) {
+    //     note.root = true;
+    //     if (note.comments.length) {
+    //       for (const comment of note.comments) {
+    //         author = await handler.Users.takeFromDb(`SELECT username FROM users WHERE rowid = ${+comment.userId}`);
+    //         comment.author = author[0].username;
+    //         comment.root = true;
+    //       }
+    //     }
+    //   }
+    //   if (note.comments.length) {
+    //     for (const comment of note.comments) {
+    //       author = await handler.Users.takeFromDb(`SELECT username FROM users WHERE rowid = ${+comment.userId}`);
+    //       comment.author = author[0].username;
+    //       if (comment.userId === userId) {
+    //         comment.root = true;
+    //       }
+    //     }
+    //   }
+    // }
+    // return notes;
   }
 
   static create(data) {
-    const note = new Note(data.tagText, data.noteText, data.userId);
-    statistics.unshift(data.userId);
+    const note = new Note(data.text, data.userId);
     return handler.Notes.pushInDb(note);
   }
 
@@ -139,6 +138,22 @@ class Note {
     if (text.tagText) {
       return handler.Notes.editTagInDb(text.tagText, id);
     }
+  }
+}
+
+class Tag {
+  constructor(noteId, text) {
+    this.noteId = noteId;
+    this.text = text;
+  }
+
+  static create(data) {
+    const tag = new Tag(data.text, data.noteId);
+    return handler.Notes.pushInDb(tag);
+  }
+
+  static delete(id) {
+    handler.Comments.deleteFromDb('rowid', id);
   }
 }
 

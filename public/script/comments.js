@@ -13,7 +13,7 @@ window.addEventListener('click', (target) => {
       id: idForDb,
       text: textInner,
     });
-    xhr('post', '/api/v1/comments/create', json, 'application/json')
+    xhr('post', '/api/v1/comments/', json, 'application/json')
       .then((res) => {
         if (document.getElementById('elemErr')) {
           const delElem = document.getElementById('elemErr');

@@ -1,5 +1,4 @@
 const sqlite = require('sqlite3').verbose();
-const mongo = require('../mongodb/mongo');
 
 
 const openDb = () => Promise.resolve(new sqlite.Database('data.db'));
@@ -64,10 +63,20 @@ function workWithTable(db, setupTable, data) {
 function closeDb(db) {
   db.close();
 }
+class Tags extends Db {
+  static async pushInDb(tag) {
+    await run(db => workWithTable(db, 'INSERT INTO tags VALUES (?,?)', [tag.text, tag.noteId]));
+    return run(db => refreshNotesCount(db));
+  }
+
+  static deleteFromDb(noteId, tag) {
+    return run(db => selectFromTable(db, `DELETE FROM tags WHERE noteId = ${noteId}, text = ${tag}`));
+  }
+}
 
 class Notes extends Db {
   static async pushInDb(note) {
-    await run(db => workWithTable(db, 'INSERT INTO notes VALUES (?,?,?,?,?)', [note.tag, note.text, note.date, note.userId, 0]));
+    await run(db => workWithTable(db, 'INSERT INTO notes VALUES (?,?,?,?)', [note.text, note.date, note.userId, 0]));
     return run(db => refreshNotesCount(db));
   }
 
@@ -150,7 +159,7 @@ class Likes extends Db {
     const maxLikes = Math.max.apply(null, result);
     for (const user of usersWithLikes) {
       user.raiting = Math.round((user.myLike / maxLikes) * 100) || 0;
-      await mongo.update('users', {email: user.email}, user);
+      // await mongo.update('users', {email: user.email}, user);
     }
     return usersWithLikes;
   }
@@ -162,7 +171,7 @@ class Likes extends Db {
 
 class Users extends Db {
   static pushInDb(user) {
-    mongo.save('users', user);
+    // mongo.save('users', user);
     return run(db => workWithTable(db, 'INSERT INTO users VALUES (?,?,?,?,?,?,?)', [user.username, user.password, user.email, user.telephone, user.dateBirthday, 0, 0]));
   }
 

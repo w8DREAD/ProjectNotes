@@ -7,14 +7,7 @@ const exphbs = require('express-handlebars');
 const passport = require('passport');
 const session = require('express-session');
 const SessionStore = require('session-file-store')(session);
-
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
-const notesRouter = require('./routes/notes');
-const featuresRouter = require('./routes/features');
-const addNotesRouter = require('./routes/addNotes');
-const logsRouter = require('./routes/logs');
-const commentsRouter = require('./routes/comments');
+const routes = require('./routes');
 
 const app = express();
 
@@ -53,13 +46,14 @@ app.engine('.hbs', exphbs({
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 app
-  .use('/api/v1/', indexRouter)
-  .use('/api/v1/notes', notesRouter)
-  .use('/api/v1/features', featuresRouter)
-  .use('/api/v1/users', usersRouter)
-  .use('/api/v1/addNotes', addNotesRouter)
-  .use('/logs', logsRouter)
-  .use('/api/v1/comments', commentsRouter)
+  .use('/', routes.main)
+  .use('/api/v1/notes', routes.notes)
+  .use('/features', routes.features)
+  .use('/api/v1/users', routes.users)
+  .use('/addNote', routes.addNote)
+  .use('/logs', routes.logs)
+  .use('/api/v1/comments', routes.comments)
+  .use('/pageNotes', routes.pageNotes)
 
   .use((req, res, next) => {
     next(createError(404));
