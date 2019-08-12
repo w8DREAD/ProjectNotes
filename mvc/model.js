@@ -65,7 +65,7 @@ function closeDb(db) {
 }
 class Tags extends Db {
   static async pushInDb(tag) {
-    await run(db => workWithTable(db, 'INSERT INTO tags VALUES (?,?)', [tag.text, tag.noteId]));
+    await run(db => workWithTable(db, 'INSERT INTO tags VALUES (?,?)', [tag.noteId, tag.text]));
     return run(db => refreshNotesCount(db));
   }
 

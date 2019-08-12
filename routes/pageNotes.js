@@ -7,12 +7,13 @@ const schemes = require('../schemes');
 const app = express();
 const control = require('../mvc/control');
 const middleware = require('../auth/middleware');
+const asyncMw = require('./asyncMiddleware');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 
-router.get('/', async (req, res, next) => {
+router.get('/', asyncMw(async (req, res, next) => {
   let userId;
   let name;
   let log = false;
@@ -34,6 +35,6 @@ router.get('/', async (req, res, next) => {
     addClassNews: 'active',
     notes: notes.reverse(),
   });
-});
+}));
 
 module.exports = router;

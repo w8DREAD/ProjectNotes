@@ -83,7 +83,7 @@ class Note {
 
   static async reproduce(userId) {
     const notesFromDb = await handler.Notes.takeFromDb('SELECT rowid AS id, * FROM notes');
-    console.log(await handler.Notes.takeFromDb('SELECT * FROM tags'));
+    console.log(await handler.Notes.takeFromDb('SELECT rowid AS id, * FROM tags'));
     console.log(notesFromDb);
     return notesFromDb;
     // const commentsFromDb = await handler.Comments.takeFromDb('SELECT rowid AS id, * FROM comments');

@@ -43,7 +43,7 @@ window.addEventListener('click', (target) => {
     const deleteApply = window.confirm('Заметка удалиться со всеми комментариями!\n Вы уверены что хотите удалить заметку?');
     if (deleteApply) {
       const main = document.querySelector('div.content');
-      xhr('delete', `notes/${idForDb}`);
+      xhr('delete', `api/v1/notes/${idForDb}`);
       main.removeChild(post);
     }
   }
@@ -57,6 +57,7 @@ window.addEventListener('click', (target) => {
     idForDb = target.target.attributes.name.value;
   }
   if (targetClassName === 'like edit text button') {
+
     return new Promise((resolve) => {
       const note = document.getElementById(`note-${idForDb}`);
       const noteText = note.innerText;
@@ -73,7 +74,7 @@ window.addEventListener('click', (target) => {
           note.setAttribute('contenteditable', 'false');
           if (saveChange) {
             const editText = `noteText=${elemNote.innerText}`;
-            xhr('put', `notes/${idForDb}`, editText)
+            xhr('put', `api/v1/notes/${idForDb}`, editText)
               .catch(() => {
                 elemNote.innerText = noteText;
               });

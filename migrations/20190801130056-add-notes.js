@@ -18,7 +18,7 @@ exports.up = function (db) {
     date: 'string',
     userId: 'int',
     tags: 'string',
-  }, 'FOREIGN (tags) REFERENCES tags(noteId)');
+  });
 };
 
 exports.down = function (db) {

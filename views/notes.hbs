@@ -13,11 +13,6 @@
 
                     <br>
                     <div id="container-tags-{{id}}">
-
-                <button type="submit" class="like edit tag button" style="margin-right: 5px" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true" id="edit-tag-{{id}}" name={{id}}>&nbsp✎</span>
-                </button>
-
                     {{#tagText}}
                         <button type="submit" class="close button tags" data-dismiss="alert" aria-label="Close" style="float: none" id="delete-tag-{{id}}">
                         <span aria-hidden="true" id="delete-tags-${idForDb}" name=${idForDb}>&times;</span>
@@ -29,7 +24,7 @@
                 </p>
 
             </div>
-            {{#if root}}
+            {{#if true}}
             <button type="submit" class="like edit text button" style="margin-right: 5px" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true" id="edit-text-{{id}}" name={{id}}>&nbsp✎</span>
             </button>
