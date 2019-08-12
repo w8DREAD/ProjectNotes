@@ -81,8 +81,10 @@ class Note {
     this.like = 0;
   }
 
-  static async pageNotes(userId) {
+  static async reproduce(userId) {
     const notesFromDb = await handler.Notes.takeFromDb('SELECT rowid AS id, * FROM notes');
+    console.log(await handler.Notes.takeFromDb('SELECT * FROM tags'));
+    console.log(notesFromDb);
     return notesFromDb;
     // const commentsFromDb = await handler.Comments.takeFromDb('SELECT rowid AS id, * FROM comments');
     // const likesFromDb = await handler.Likes.takeFromDb('SELECT rowid AS id, * FROM likes');
@@ -149,7 +151,7 @@ class Tag {
 
   static create(data) {
     const tag = new Tag(data.text, data.noteId);
-    return handler.Notes.pushInDb(tag);
+    return handler.Tags.pushInDb(tag);
   }
 
   static delete(id) {
@@ -205,5 +207,5 @@ class Like {
   }
 }
 module.exports = {
-  Note, Comment, Like, User,
+  Note, Comment, Like, User, Tag,
 };

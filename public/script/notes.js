@@ -3,10 +3,8 @@ if (document.querySelector('button.add-notes')) {
   const addNotes = document.querySelector('button.add-notes');
 
   addNotes.addEventListener('click', async () => {
-    const tag = document.getElementById('inputTags');
     const note = document.querySelector('textarea.form-control');
     const json = JSON.stringify({
-      tag: tag.value,
       text: note.value,
     });
     xhr('post', '/api/v1/notes', json, 'application/json')

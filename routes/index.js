@@ -7,4 +7,5 @@ module.exports = {
   comments: require('./comments'),
   addNote: require('./addNote'),
   pageNotes: require('./pageNotes'),
+  tags: require('./tags'),
 };

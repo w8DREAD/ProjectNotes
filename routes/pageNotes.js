@@ -25,7 +25,7 @@ router.get('/', async (req, res, next) => {
     await control.User.countLikes(userId);
     likes = await control.Like.takeRedis('myLike');
   }
-  const notes = await control.Note.pageNotes(userId) || [];
+  const notes = await control.Note.reproduce(userId) || [];
   res.render('notes', {
     username: name,
     login: log,

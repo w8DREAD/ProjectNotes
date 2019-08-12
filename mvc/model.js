@@ -76,7 +76,7 @@ class Tags extends Db {
 
 class Notes extends Db {
   static async pushInDb(note) {
-    await run(db => workWithTable(db, 'INSERT INTO notes VALUES (?,?,?,?)', [note.text, note.date, note.userId, 0]));
+    await run(db => workWithTable(db, 'INSERT INTO notes VALUES (?,?,?,?,?)', [note.text, note.date, note.userId, '', 0]));
     return run(db => refreshNotesCount(db));
   }
 
@@ -197,5 +197,5 @@ class Users extends Db {
   }
 }
 module.exports = {
-  Notes, Comments, Likes, Users,
+  Notes, Comments, Likes, Users, Tags,
 };

@@ -16,9 +16,9 @@ router.post('/', middleware(), async (req, res, next) => {
     text: req.body.text,
     userId: req.user.id,
   };
-  const valid = schemes.validator(schemes.notes, note);
-  if (!valid) {
-    return res.status(400).json(valid);
+  const invalid = schemes.validator(schemes.notes, note);
+  if (invalid) {
+    return res.status(400).json(invalid);
   }
   await control.Note.create(note);
   res.redirect('/pageNotes');

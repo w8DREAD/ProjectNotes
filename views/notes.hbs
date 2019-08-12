@@ -3,24 +3,27 @@
 
         <form class="articles-news" name="news" id="post-{{id}}">
             <div style="margin-top: 15px">
-                <p><button type="submit" class="close button tags" data-dismiss="alert" aria-label="Close" style="float: left">
+                <p><button type="submit" class="close button tags" data-dismiss="alert" aria-label="Close" style="float: left" id="button-add-tags-{{id}}">
                     <span aria-hidden="true" id="add-tags-{{id}}" name={{id}}>+</span>
                 </button>
-                    {{#if root}}
+
                     <button type="submit" class="close button notes" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true" id="delete-notes-{{id}}" name={{id}}>&times;</span>
                     </button>
-                    {{/if}}
+
                     <br>
-                    <div>
-                    {{#if root}}
+                    <div id="container-tags-{{id}}">
+
                 <button type="submit" class="like edit tag button" style="margin-right: 5px" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true" id="edit-tag-{{id}}" name={{id}}>&nbsp✎</span>
                 </button>
-                    {{/if}}
-                    {{#tags}}
-                <a id="tag-{{id}}" href="">{{tag}}</a>
-                    {{/tags}}
+
+                    {{#tagText}}
+                        <button type="submit" class="close button tags" data-dismiss="alert" aria-label="Close" style="float: none" id="delete-tag-{{id}}">
+                        <span aria-hidden="true" id="delete-tags-${idForDb}" name=${idForDb}>&times;</span>
+                    </button>
+                <a id="tag-{{id}}" href="" style="margin-left: 3px">{{.}}</a>
+                    {{/tagText}}
                     </div>
 
                 </p>

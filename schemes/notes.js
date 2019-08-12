@@ -10,5 +10,5 @@ module.exports = {
       type: 'number',
     },
   },
-  required: ['tag', 'text', 'userId'],
+  required: ['text', 'userId'],
 };

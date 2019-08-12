@@ -54,6 +54,7 @@ app
   .use('/logs', routes.logs)
   .use('/api/v1/comments', routes.comments)
   .use('/pageNotes', routes.pageNotes)
+  .use('/api/v1/tags', routes.tags)
 
   .use((req, res, next) => {
     next(createError(404));
