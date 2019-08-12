@@ -16,7 +16,18 @@ exports.up = function (db) {
   return db.createTable('notes', {
     text: 'string',
     date: 'string',
-    userId: 'int',
+    userId: {
+      type: 'int',
+      notNull: true,
+      foreignKey: {
+        name: 'notesUser',
+        table: 'users',
+        rules: {
+          onDelete: 'CASCADE',
+        },
+        mapping: 'rowid',
+      },
+    },
     tags: 'string',
   });
 };

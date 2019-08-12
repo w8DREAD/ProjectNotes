@@ -13,12 +13,12 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  return db.createTable('likes', {
+  return db.createTable('notesTags', {
     noteId: {
       type: 'int',
       notNull: true,
       foreignKey: {
-        name: 'likesNote',
+        name: 'notesTagsNote',
         table: 'notes',
         rules: {
           onDelete: 'CASCADE',
@@ -26,12 +26,12 @@ exports.up = function (db) {
         mapping: 'rowid',
       },
     },
-    userId: {
+    tagId: {
       type: 'int',
       notNull: true,
       foreignKey: {
-        name: 'likesUser',
-        table: 'users',
+        name: 'notesTagsTags',
+        table: 'tags',
         rules: {
           onDelete: 'CASCADE',
         },
