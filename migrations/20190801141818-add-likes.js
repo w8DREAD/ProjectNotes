@@ -13,35 +13,13 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  return db.createTable('likes', {
-    noteId: {
-      type: 'int',
-      notNull: true,
-      foreignKey: {
-        name: 'likesNote',
-        table: 'notes',
-        rules: {
-          onDelete: 'CASCADE',
-        },
-        mapping: 'rowid',
-      },
-    },
-    userId: {
-      type: 'int',
-      notNull: true,
-      foreignKey: {
-        name: 'likesUser',
-        table: 'users',
-        rules: {
-          onDelete: 'CASCADE',
-        },
-        mapping: 'rowid',
-      },
-    },
-  });
+  db.runSql('CREATE TABLE likes (noteId INTEGER REFERENCES notes (id) ON DELETE CASCADE NOT NULL,\n'
+    + 'userId INTEGER NOT NULL REFERENCES users (id))');
+  return db.runSql('CREATE INDEX idxLikes ON likes (noteId ASC, userId ASC);');
 };
 
 exports.down = function (db) {
+  db.runSql('DROP INDEX idxLikes');
   return db.dropTable('likes');
 };
 

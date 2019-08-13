@@ -54,7 +54,6 @@ router.put('/:id', middleware(), async (req, res, next) => {
 
 router.delete('/:id', middleware(), async (req, res, next) => {
   const {id} = req.params;
-  console.log(id);
   await control.Note.delete(id);
   console.log('loading page');
   res.sendStatus(200);

@@ -13,23 +13,9 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  return db.createTable('notes', {
-    text: 'string',
-    date: 'string',
-    userId: {
-      type: 'int',
-      notNull: true,
-      foreignKey: {
-        name: 'notesUser',
-        table: 'users',
-        rules: {
-          onDelete: 'CASCADE',
-        },
-        mapping: 'rowid',
-      },
-    },
-    tags: 'string',
-  });
+  db.all('PRAGMA foreign_keys = ON');
+  return db.runSql('CREATE TABLE notes (id INTEGER PRIMARY KEY AUTOINCREMENT, text VARCHAR, date VARCHAR,\n'
+    + 'userId INTEGER NOT NULL REFERENCES users (id))');
 };
 
 exports.down = function (db) {

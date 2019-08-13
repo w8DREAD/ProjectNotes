@@ -13,36 +13,17 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  return db.createTable('notesTags', {
-    noteId: {
-      type: 'int',
-      notNull: true,
-      foreignKey: {
-        name: 'notesTagsNote',
-        table: 'notes',
-        rules: {
-          onDelete: 'CASCADE',
-        },
-        mapping: 'rowid',
-      },
-    },
-    tagId: {
-      type: 'int',
-      notNull: true,
-      foreignKey: {
-        name: 'notesTagsTags',
-        table: 'tags',
-        rules: {
-          onDelete: 'CASCADE',
-        },
-        mapping: 'rowid',
-      },
-    },
-  });
+  db.runSql('CREATE TRIGGER updNotesTagsInsert AFTER INSERT ON tags\n'
+    + 'BEGIN\n'
+    + 'INSERT INTO notesTags (noteId, tagId) VALUES (NEW.noteId, NEW.id);\n'
+    + 'END');
+  return db.runSql('CREATE TABLE notesTags (noteId INTEGER REFERENCES notes (id) ON DELETE CASCADE NOT NULL,\n'
+    + 'tagId INTEGER REFERENCES tags (id) ON DELETE CASCADE NOT NULL)');
 };
 
 exports.down = function (db) {
-  return db.dropTable('likes');
+  db.runSql('DROP TRIGGER updNotesTagsInsert');
+  return db.dropTable('notesTags');
 };
 
 exports._meta = {

@@ -37,7 +37,7 @@ class User {
   }
 
   static async activity() {
-    const users = await handler.Users.takeFromDb('SELECT rowid AS id, * FROM users');
+    const users = await handler.Users.takeFromDb('SELECT * FROM users');
     for (const user of users) {
       user.activity = 1;
       for (const userId of statistics) {
@@ -56,7 +56,7 @@ class User {
   static async create(user) {
     const newUser = new User(user.username, user.password,
       user.email, user.telephone, user.dateBirthday);
-    const email = await handler.Users.takeFromDb(`SELECT rowid as id, * FROM users WHERE '${user.email}'`);
+    const email = await handler.Users.takeFromDb(`SELECT * FROM users WHERE '${user.email}'`);
     if (email[0]) {
       return false;
     }
@@ -82,8 +82,9 @@ class Note {
   }
 
   static async reproduce(userId) {
-    const notesFromDb = await handler.Notes.takeFromDb('SELECT rowid AS id, * FROM notes');
-    console.log(await handler.Notes.takeFromDb('SELECT rowid AS id, * FROM tags'));
+    const notesFromDb = await handler.Notes.takeFromDb('SELECT (SELECT tag FROM tags WHERE tags.noteId = notes.id) AS tags, * FROM notes');
+    console.log(await handler.Notes.takeFromDb('SELECT * FROM tags'));
+    console.log(await handler.Notes.takeFromDb('SELECT * FROM comments'));
     console.log(notesFromDb);
     return notesFromDb;
     // const commentsFromDb = await handler.Comments.takeFromDb('SELECT rowid AS id, * FROM comments');
@@ -128,8 +129,6 @@ class Note {
   }
 
   static delete(id) {
-    handler.Likes.deleteFromDb(id);
-    handler.Comments.deleteFromDb('noteId', id);
     handler.Notes.deleteFromDb(id);
   }
 
@@ -155,7 +154,7 @@ class Tag {
   }
 
   static delete(id) {
-    handler.Comments.deleteFromDb('rowid', id);
+    handler.Comments.deleteFromDb('id', id);
   }
 }
 
@@ -173,7 +172,7 @@ class Comment {
   }
 
   static delete(id) {
-    handler.Comments.deleteFromDb('rowid', id);
+    handler.Comments.deleteFromDb('id', id);
   }
 }
 

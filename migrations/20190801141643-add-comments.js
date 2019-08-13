@@ -13,11 +13,9 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  return db.createTable('comments', {
-    text: 'string',
-    noteId: 'int',
-    userId: 'int',
-  });
+  return db.runSql('CREATE TABLE comments (id INTEGER PRIMARY KEY AUTOINCREMENT, text VARCHAR,\n'
+    + 'noteId INTEGER REFERENCES notes (id) ON DELETE CASCADE NOT NULL, '
+    + 'userId INTEGER REFERENCES users (id) NOT NULL)');
 };
 
 exports.down = function (db) {

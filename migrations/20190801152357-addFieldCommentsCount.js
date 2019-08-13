@@ -13,17 +13,27 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
+  db.runSql('CREATE TRIGGER updCommentsCountInsert AFTER INSERT ON comments\n'
+    + 'BEGIN'
+    + '    UPDATE notes SET comCount = (SELECT COUNT(*) \n'
+    + '           FROM comments WHERE noteId = notes.id)\n'
+    + '     WHERE id = NEW.noteId;'
+    + 'END');
+  db.runSql('CREATE TRIGGER updCommentsCountDelete AFTER DELETE ON notes\n'
+    + 'BEGIN'
+    + '    UPDATE notes SET comCount = (SELECT COUNT(*) \n'
+    + '           FROM comments WHERE noteId = notes.id)\n'
+    + '     WHERE id = OLD.id;'
+    + 'END');
   return db.addColumn('notes', 'comCount', { type: 'int' });
 };
 
 exports.down = function (db) {
+  db.runSql('DROP TRIGGER updCommentsCountInsert');
+  db.runSql('DROP TRIGGER updCommentsCountDelete');
   db.dropTable('notes');
-  return db.createTable('notes', {
-    tag: 'string',
-    text: 'string',
-    date: 'string',
-    userId: 'int',
-  });
+  return db.runSql('CREATE TABLE notes (id INTEGER PRIMARY KEY AUTOINCREMENT, text VARCHAR, date VARCHAR,\n'
+    + 'userId INTEGER NOT NULL REFERENCES users (id), tags VARCHAR)');
 };
 
 exports._meta = {

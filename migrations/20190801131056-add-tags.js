@@ -15,10 +15,8 @@ exports.setup = function (options, seedLink) {
 };
 
 exports.up = function (db) {
-  return db.createTable('tags', {
-    text: 'string',
-    noteId: 'int',
-  });
+  return db.runSql('CREATE TABLE tags (id INTEGER PRIMARY KEY AUTOINCREMENT, tag VARCHAR,\n'
+    + 'noteId INTEGER REFERENCES notes (id) ON DELETE CASCADE NOT NULL)');
 };
 
 exports.down = function (db) {

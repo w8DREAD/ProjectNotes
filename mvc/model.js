@@ -5,6 +5,7 @@ const openDb = () => Promise.resolve(new sqlite.Database('data.db'));
 
 async function run(queryfn) {
   const db = await openDb();
+  db.get('PRAGMA foreign_keys = ON');
   const res = await queryfn(db);
   closeDb(db);
   return res;
@@ -14,26 +15,6 @@ class Db {
   static async takeFromDb(params) {
     return run(db => selectFromTable(db, params));
   }
-}
-
-async function refreshComCount(db) {
-  const notes = await selectFromTable(db, 'SELECT rowid AS id, * FROM notes');
-  const comments = await selectFromTable(db, 'SELECT rowid AS id, * FROM comments');
-  for (const item of notes) {
-    const comCount = comments.filter(comment => comment.noteId === item.id);
-    workWithTable(db, 'UPDATE notes SET comCount = ? WHERE rowid = ?', [comCount.length, item.id]);
-  }
-  return true;
-}
-
-async function refreshNotesCount(db) {
-  const users = await selectFromTable(db, 'SELECT rowid AS id, * FROM users');
-  const notes = await selectFromTable(db, 'SELECT rowid AS id, * FROM notes');
-  for (const item of users) {
-    const notesCount = notes.filter(note => note.userId === item.id);
-    workWithTable(db, 'UPDATE users SET notesCount = ? WHERE rowid = ?', [notesCount.length, item.id]);
-  }
-  return true;
 }
 
 function selectFromTable(db, setupTable) {
@@ -65,8 +46,7 @@ function closeDb(db) {
 }
 class Tags extends Db {
   static async pushInDb(tag) {
-    await run(db => workWithTable(db, 'INSERT INTO tags VALUES (?,?)', [tag.noteId, tag.text]));
-    return run(db => refreshNotesCount(db));
+    return run(db => workWithTable(db, 'INSERT INTO tags VALUES (?,?,?)', [tag.id, tag.noteId, tag.text]));
   }
 
   static deleteFromDb(noteId, tag) {
@@ -76,8 +56,7 @@ class Tags extends Db {
 
 class Notes extends Db {
   static async pushInDb(note) {
-    await run(db => workWithTable(db, 'INSERT INTO notes VALUES (?,?,?,?,?)', [note.text, note.date, note.userId, '', 0]));
-    return run(db => refreshNotesCount(db));
+    return run(db => workWithTable(db, 'INSERT INTO notes VALUES (?,?,?,?,?)', [note.id, note.text, note.date, note.userId, 0]));
   }
 
   static deleteFromDb(id) {
@@ -95,8 +74,7 @@ class Notes extends Db {
 
 class Comments extends Db {
   static async pushInDb(comment) {
-    await run(db => workWithTable(db, 'INSERT INTO comments VALUES (?,?,?)', [comment.text, comment.noteId, comment.userId]));
-    await run(db => refreshComCount(db));
+    await run(db => workWithTable(db, 'INSERT INTO comments VALUES (?,?,?,?)', [comment.id, comment.text, comment.noteId, comment.userId]));
     return run(db => selectFromTable(db, 'SELECT last_insert_rowid() AS id'));
   }
 
@@ -172,7 +150,7 @@ class Likes extends Db {
 class Users extends Db {
   static pushInDb(user) {
     // mongo.save('users', user);
-    return run(db => workWithTable(db, 'INSERT INTO users VALUES (?,?,?,?,?,?,?)', [user.username, user.password, user.email, user.telephone, user.dateBirthday, 0, 0]));
+    return run(db => workWithTable(db, 'INSERT INTO users VALUES (?,?,?,?,?,?,?,?)', [user.id, user.username, user.password, user.email, user.telephone, user.dateBirthday, 0, 0]));
   }
 
   static async refreshLike(userId) {
