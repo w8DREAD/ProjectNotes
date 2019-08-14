@@ -24,23 +24,6 @@ router.post('/', middleware(), async (req, res, next) => {
   res.redirect('/pageNotes');
 });
 
-router.post('/like', middleware(), async (req, res, next) => {
-  const {noteId} = req.body;
-  const userId = req.user.id;
-  if (await control.Like.create({noteId, userId})) {
-    res.status(200).json({
-      status: true,
-      likesCount: await control.Like.takeRedis('myLike'),
-    });
-  } else {
-    res.status(200).json({
-      status: false,
-      likesCount: await control.Like.takeRedis('myLike'),
-    });
-  }
-  await control.User.refreshLikeInDb(userId);
-});
-
 router.put('/:id', middleware(), async (req, res, next) => {
   const text = req.body;
   const {id} = req.params;

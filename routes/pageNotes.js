@@ -23,8 +23,8 @@ router.get('/', asyncMw(async (req, res, next) => {
     userId = req.user.id;
     log = true;
     name = req.user.username;
-    await control.User.countLikes(userId);
-    likes = await control.Like.takeRedis('myLike');
+    await control.User.redisLike(userId);
+    // likes = await control.Like.takeRedis(userId);
   }
   const notes = await control.Note.reproduce(userId) || [];
   res.render('notes', {

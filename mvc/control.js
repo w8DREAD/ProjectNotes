@@ -49,10 +49,6 @@ class User {
     return users;
   }
 
-  static async giveTags(userId, num) {
-    return handler.Users.giveTags(userId, num);
-  }
-
   static async create(user) {
     const newUser = new User(user.username, user.password,
       user.email, user.telephone, user.dateBirthday);
@@ -63,13 +59,11 @@ class User {
     return handler.Users.pushInDb(newUser);
   }
 
-  static async countLikes(userId) {
-    redis.save('myLike', await handler.Likes.countLikes(userId));
+  static async redisLike(userId) {
+    const likesCount = await handler.Likes.takeFromDb(`SELECT COUNT (*) FROM likes WHERE noteId IN (SELECT id FROM notes WHERE userId = ${userId})`);
+    console.log(likesCount);
+    redis.save(`${userId}`, likesCount);
     return true;
-  }
-
-  static async refreshLikeInDb(userId) {
-    return handler.Users.refreshLike(userId);
   }
 }
 
@@ -82,50 +76,33 @@ class Note {
   }
 
   static async reproduce(userId) {
-    const notesFromDb = await handler.Notes.takeFromDb('SELECT (SELECT tag FROM tags WHERE tags.noteId = notes.id) AS tags, * FROM notes');
-    console.log(await handler.Notes.takeFromDb('SELECT * FROM tags'));
-    console.log(await handler.Notes.takeFromDb('SELECT * FROM comments'));
-    console.log(notesFromDb);
+    const notesFromDb = await handler.Notes.takeFromDb('SELECT * FROM notes');
+    const tagsFromDb = await handler.Tags.takeFromDb('SELECT * FROM tags');
+    const commentsFromDb = await handler.Comments.takeFromDb('SELECT * FROM comments');
+    for (const note of notesFromDb) {
+      const tags = await handler.Tags.takeFromDb(`SELECT * FROM tags WHERE noteId = ${note.id}`);
+      const author = await handler.Users.takeFromDb(`SELECT username FROM users WHERE id = ${note.userId}`);
+      const likes = await handler.Likes.takeFromDb(`SELECT username FROM users WHERE id = ${note.userId}`);
+      note.tag = tags.reverse();
+      note.comments = await handler.Comments.takeFromDb(`SELECT * FROM comments WHERE noteId = ${note.id}`);
+      note.author = author[0].username;
+      note.likes = likes.length;
+    }
     return notesFromDb;
-    // const commentsFromDb = await handler.Comments.takeFromDb('SELECT rowid AS id, * FROM comments');
-    // const likesFromDb = await handler.Likes.takeFromDb('SELECT rowid AS id, * FROM likes');
-    // const notes = notesFromDb.map((arg) => {
-    //   const note = arg;
-    //   const noteLikes = likesFromDb.filter(like => +like.noteId === note.id);
-    //   note.likes = noteLikes.length;
-    //   note.comments = commentsFromDb.filter(comment => comment.noteId === note.id);
-    //   return note;
-    // });
-    // for (const note of notes) {
-    //   let author = await handler.Users.takeFromDb(`SELECT username FROM users WHERE rowid = ${+note.userId}`);
-    //   console.log(note);
-    //   note.author = author[0].username;
-    //   if (note.userId === userId) {
-    //     note.root = true;
-    //     if (note.comments.length) {
-    //       for (const comment of note.comments) {
-    //         author = await handler.Users.takeFromDb(`SELECT username FROM users WHERE rowid = ${+comment.userId}`);
-    //         comment.author = author[0].username;
-    //         comment.root = true;
-    //       }
-    //     }
-    //   }
-    //   if (note.comments.length) {
-    //     for (const comment of note.comments) {
-    //       author = await handler.Users.takeFromDb(`SELECT username FROM users WHERE rowid = ${+comment.userId}`);
-    //       comment.author = author[0].username;
-    //       if (comment.userId === userId) {
-    //         comment.root = true;
-    //       }
-    //     }
-    //   }
-    // }
-    // return notes;
   }
 
   static create(data) {
     const note = new Note(data.text, data.userId);
     return handler.Notes.pushInDb(note);
+  }
+
+  static async checkUser(noteId, userId) {
+    const note = await handler.Notes.takeFromDb(`SELECT COUNT (*) FROM notes WHERE id = ${noteId} AND userId = ${userId}`);
+    console.log(note);
+    if (note) {
+      return true;
+    }
+    return false;
   }
 
   static delete(id) {
@@ -154,7 +131,7 @@ class Tag {
   }
 
   static delete(id) {
-    handler.Comments.deleteFromDb('id', id);
+    handler.Tags.deleteFromDb(id);
   }
 }
 
@@ -172,7 +149,7 @@ class Comment {
   }
 
   static delete(id) {
-    handler.Comments.deleteFromDb('id', id);
+    handler.Comments.deleteFromDb(id);
   }
 }
 
@@ -184,21 +161,20 @@ class Like {
 
   static async create({ noteId, userId }) {
     const like = new Like(noteId, userId);
-    if (await this.check(like)) {
+    const existsLike = await handler.Likes.takeFromDb(`SELECT COUNT(*) AS count FROM likes WHERE noteId = ${noteId} AND userId = ${userId}`);
+    const likes = await handler.Likes.takeFromDb('SELECT COUNT(*) as count FROM likes');
+    console.log(likes);
+    if (!existsLike.length) {
       await handler.Likes.pushInDb(like);
-      await User.countLikes(userId);
+      await User.redisLike(`${userId}`);
       return true;
     }
-    await User.countLikes(userId);
+    await User.redisLike(`${userId}`);
     return false;
   }
 
   static async raiting(latestNote) {
     return handler.Likes.raitingAllUsers(latestNote);
-  }
-
-  static check(like) {
-    return handler.Likes.checkInDb(like);
   }
 
   static takeRedis(prop) {

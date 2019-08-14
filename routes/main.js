@@ -5,9 +5,10 @@ const control = require('../mvc/control');
 const router = express.Router();
 
 router.get('/', middleware(), async (req, res, next) => {
+  const userId = req.user.id;
   res.render('main', {
     username: req.user.username,
-    like: await control.Like.takeRedis('myLike'),
+    like: await control.Like.takeRedis(`${userId}`),
     login: true,
     title: 'Заметки',
     addClassMain: 'active',

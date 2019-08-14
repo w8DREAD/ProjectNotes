@@ -14,5 +14,16 @@ router.post('/', middleware(), async (req, res, next) => {
   res.status(201).json('ok');
 });
 
+router.delete('/:id', middleware(), async (req, res, next) => {
+  const {id} = req.params;
+  const noteId = Number(req.body.noteId);
+  const userId = req.user.id;
+  if (await control.Note.checkUser(noteId, userId)) {
+    await control.Tag.delete(id);
+    console.log('loading page');
+    return res.sendStatus(200);
+  }
+  return res.sendStatus(401);
+});
 
 module.exports = router;
