@@ -63,8 +63,11 @@ window.addEventListener('click', (target) => {
     });
     const deleteApply = window.confirm('Вы уверены что хотите удалить комментарий?');
     if (deleteApply) {
-      xhr('delete', `/api/v1/comments/${idForDb}`);
-      comment.parentNode.removeChild(comment);
+      xhr('delete', `/api/v1/comments/${idForDb}`)
+        .then(() => {
+          comment.parentNode.removeChild(comment);
+        })
+        .catch(() => console.log('Нет прав на удаление комментария'));
     }
   }
 });

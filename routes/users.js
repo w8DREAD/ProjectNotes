@@ -1,11 +1,10 @@
 const express = require('express');
 const passport = require('passport');
 const control = require('../mvc/control');
-
 const schema = require('../schemes');
 
 const router = express.Router();
-const middleware = require('../auth/middleware');
+const middleware = require('../auth');
 
 router.get('/register', (req, res, next) => {
   if (!req.isAuthenticated()) {
@@ -23,7 +22,7 @@ router.get('/login', (req, res, next) => {
   }
 });
 
-router.post('/register', async (req, res, next) => {
+router.post('/register', middleware.async(async (req, res, next) => {
   const user = req.body;
   const valid = schema.validator(schema.register, user);
   if (valid) {
@@ -33,9 +32,9 @@ router.post('/register', async (req, res, next) => {
     return res.redirect('/api/v1/users/login');
   }
   return res.status(400).json('На эту почту уже зарегестрирован пользователь!');
-});
+}));
 
-router.get('/logout', middleware(), (req, res) => {
+router.get('/logout', middleware.auth(), (req, res) => {
   req.logout();
   res.redirect('/api/v1/users/login');
 });

@@ -97,7 +97,7 @@ window.addEventListener('click', (target) => {
     const json = JSON.stringify({
       noteId: idForDb,
     });
-    xhr('post', '/api/v1/notes/like', json, 'application/json')
+    xhr('post', '/api/v1/likes/', json, 'application/json')
       .then((res) => {
         response = res;
         if (JSON.parse(res).status) {

@@ -3,7 +3,7 @@
 
         <form class="articles-news" name="news" id="post-{{id}}">
             <div style="margin-top: 15px">
-                <p><button type="submit" class="close button tags" data-dismiss="alert" aria-label="Close" style="float: left" id="button-add-tags-{{id}}">
+                <p><button type="submit" class="close button add tags" data-dismiss="alert" aria-label="Close" style="float: left" id="button-add-tags-{{id}}">
                     <span aria-hidden="true" id="add-tags-{{id}}" name={{id}}>+</span>
                 </button>
 
@@ -13,22 +13,20 @@
 
                     <br>
                     <div id="container-tags-{{id}}">
-                    {{#tags}}
-                        <button type="submit" class="close button tags" data-dismiss="alert" aria-label="Close" style="float: none" id="delete-tag-{{id}}">
-                        <span aria-hidden="true" id="delete-tags-${idForDb}" name=${idForDb}>&times;</span>
+                    {{#tag}}
+                        <button type="submit" class="close button delete tags" data-dismiss="alert" aria-label="Close" style="float: none" id="delete-tag-{{id}}" name="{{noteId}}">
+                        <span aria-hidden="true" id="delete-tags-{{id}}" name={{id}}>&times;</span>
                     </button>
-                <a id="tag-{{id}}" href="" style="margin-left: 3px">{{.}}</a>
-                    {{/tags}}
+                <a id="tag-{{id}}" href="" style="margin-left: 3px">{{tag}}</a>
+                    {{/tag}}
                     </div>
 
                 </p>
 
             </div>
-            {{#if true}}
             <button type="submit" class="like edit text button" style="margin-right: 5px" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true" id="edit-text-{{id}}" name={{id}}>&nbsp✎</span>
             </button>
-            {{/if}}
             <a style="margin: 15px 0 15px 0" id="note-{{id}}">
                     {{text}}
             </a>
@@ -41,16 +39,13 @@
             {{#comments}}
             <div class="articles-news comments">
                {{text}}<br>
-            {{#if root}}
                 <button type="submit" class="close button comment" data-dismiss="alert" aria-label="Close">
                     <span aria-hidden="true" id="delete-comment-{{id}}" name={{id}}>&times;</span>
                 </button>
-            {{/if}}
                 <br>
                 <span aria-hidden="true" style="float: left; margin-top: 10px">Комментарий от: {{author}}</span>
             </div>
             {{/comments}}
-            {{#if ../login}}
             <div class="input-group add-notes" id="add-notes-{{id}}">
 
                 <div class="input-group-prepend">
@@ -58,7 +53,6 @@
                 </div>
                 <div type="tags" class="form-control" id="inputComment-{{id}}" placeholder="напиши комментарий" contenteditable="true"></div>
             </div>
-            {{/if}}
         </div>
 
             <div style="margin-top: 5px">

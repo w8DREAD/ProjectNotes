@@ -1,14 +1,14 @@
 const express = require('express');
-const middleware = require('../auth/middleware');
+const middleware = require('../auth');
 
 const router = express.Router();
 const mongo = require('../mongodb/mongo');
 
 const control = require('../mvc/control');
 
-router.get('/', middleware(), async (req, res, next) => {
+router.get('/', middleware.auth(), middleware.async(async (req, res, next) => {
   // await control.User.activity();
-  // const userId = req.user.id;
+  const userId = req.user.id;
   // const num = 5;
   // await control.Like.raiting();
   // const users = await mongo.take('users');
@@ -31,7 +31,13 @@ router.get('/', middleware(), async (req, res, next) => {
   //   //   lastTags,
   //   //   activityUsers: await control.User.activity(),
   //   // });
-  res.render('features');
-});
+  res.render('features', {
+    username: req.user.username,
+    login: true,
+    like: await control.Like.takeRedis(`${userId}`),
+    features: 'Рейтинг всех пользователей по набранным лайкам:',
+    addClassFeatures: 'active',
+  });
+}));
 
 module.exports = router;

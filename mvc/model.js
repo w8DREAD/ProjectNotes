@@ -49,8 +49,8 @@ class Tags extends Db {
     return run(db => workWithTable(db, 'INSERT INTO tags VALUES (?,?,?)', [tag.id, tag.noteId, tag.text]));
   }
 
-  static deleteFromDb(noteId, tag) {
-    return run(db => selectFromTable(db, `DELETE FROM tags WHERE noteId = ${noteId}, text = ${tag}`));
+  static deleteFromDb(id) {
+    return run(db => selectFromTable(db, `DELETE FROM tags WHERE id = ${id}`));
   }
 }
 
@@ -60,15 +60,15 @@ class Notes extends Db {
   }
 
   static deleteFromDb(id) {
-    return run(db => selectFromTable(db, `DELETE FROM notes WHERE rowid = ${id}`));
+    return run(db => selectFromTable(db, `DELETE FROM notes WHERE id = ${id}`));
   }
 
   static editTextInDb(text, id) {
-    return run(db => workWithTable(db, 'UPDATE notes SET text = ? WHERE rowid = ?', [text, id]));
+    return run(db => workWithTable(db, 'UPDATE notes SET text = ? WHERE id = ?', [text, id]));
   }
 
   static editTagInDb(text, id) {
-    return run(db => workWithTable(db, 'UPDATE notes SET tag = ? WHERE rowid = ?', [text, id]));
+    return run(db => workWithTable(db, 'UPDATE notes SET tag = ? WHERE id = ?', [text, id]));
   }
 }
 
@@ -78,8 +78,8 @@ class Comments extends Db {
     return run(db => selectFromTable(db, 'SELECT last_insert_rowid() AS id'));
   }
 
-  static deleteFromDb(field, id) {
-    return run(db => selectFromTable(db, `DELETE FROM comments WHERE ${field} = ${id}`));
+  static deleteFromDb(id) {
+    return run(db => selectFromTable(db, `DELETE FROM comments WHERE id = ${id}`));
   }
 }
 
@@ -88,40 +88,18 @@ class Likes extends Db {
     return run(db => workWithTable(db, 'INSERT INTO likes VALUES (?,?)', [like.noteId, like.userId]));
   }
 
-  static async checkInDb(like) {
-    const likes = await run(db => selectFromTable(db, 'SELECT rowid AS id, * FROM likes'));
-    const likeDb = likes.filter(dbLike => +dbLike.userId === +like.userId
-              && +dbLike.noteId === +like.noteId);
-    if (likeDb.length) {
-      await run(db => selectFromTable(db, `DELETE FROM likes WHERE rowid = ${likeDb[0].id}`));
-      return false;
-    }
-    return true;
-  }
-
-  static async countLikes(userId) {
-    let result = 0;
-    const notes = await run(db => selectFromTable(db, `SELECT rowid AS id FROM notes WHERE userId = ${userId}`));
-    const likes = await run(db => selectFromTable(db, 'SELECT * FROM likes'));
-    for (const item of notes) {
-      const count = likes.filter(like => like.noteId === item.id);
-      result += count.length;
-    }
-    return result;
-  }
-
   static async raitingAllUsers(num = 0) {
     const result = [];
     let notes = [];
     const usersWithLikes = [];
     if (num) {
-      const fromDb = await run(db => selectFromTable(db, 'SELECT rowid AS id, * FROM notes'));
+      const fromDb = await run(db => selectFromTable(db, 'SELECT * FROM notes'));
       notes = fromDb.reverse().splice(0, num);
     } else {
-      notes = await run(db => selectFromTable(db, 'SELECT rowid AS id, * FROM notes'));
+      notes = await run(db => selectFromTable(db, 'SELECT * FROM notes'));
     }
 
-    const users = await run(db => selectFromTable(db, 'SELECT rowid AS id, * FROM users'));
+    const users = await run(db => selectFromTable(db, 'SELECT * FROM users'));
     for (const user of users) {
       let likes = 0;
       for (const note of notes) {
@@ -142,8 +120,8 @@ class Likes extends Db {
     return usersWithLikes;
   }
 
-  static deleteFromDb(id) {
-    return run(db => selectFromTable(db, `DELETE FROM likes WHERE noteId = ${id}`));
+  static deleteFromDb(noteId, userId) {
+    return run(db => selectFromTable(db, `DELETE FROM likes WHERE noteId = ${noteId} AND userId = ${userId}`));
   }
 }
 
@@ -151,11 +129,6 @@ class Users extends Db {
   static pushInDb(user) {
     // mongo.save('users', user);
     return run(db => workWithTable(db, 'INSERT INTO users VALUES (?,?,?,?,?,?,?,?)', [user.id, user.username, user.password, user.email, user.telephone, user.dateBirthday, 0, 0]));
-  }
-
-  static async refreshLike(userId) {
-    const likes = await Likes.countLikes(userId);
-    return run(db => workWithTable(db, 'UPDATE users SET myLike = ? WHERE rowid = ?', [likes, userId]));
   }
 
   static giveNote(userId) {

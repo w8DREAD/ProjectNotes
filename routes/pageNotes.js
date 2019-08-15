@@ -6,14 +6,13 @@ const schemes = require('../schemes');
 
 const app = express();
 const control = require('../mvc/control');
-const middleware = require('../auth/middleware');
-const asyncMw = require('./asyncMiddleware');
+const middleware = require('../auth');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 
-router.get('/', asyncMw(async (req, res, next) => {
+router.get('/', middleware.async(async (req, res, next) => {
   let userId;
   let name;
   let log = false;
@@ -23,10 +22,10 @@ router.get('/', asyncMw(async (req, res, next) => {
     userId = req.user.id;
     log = true;
     name = req.user.username;
-    await control.User.countLikes(userId);
-    likes = await control.Like.takeRedis('myLike');
+    await control.User.redisLike(userId);
+    likes = await control.Like.takeRedis(userId);
   }
-  const notes = await control.Note.reproduce(userId) || [];
+  const notes = await control.Note.reproduce() || [];
   res.render('notes', {
     username: name,
     login: log,

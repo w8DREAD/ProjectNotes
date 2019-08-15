@@ -3,15 +3,15 @@ const express = require('express');
 const router = express.Router();
 const control = require('../mvc/control');
 const schemes = require('../schemes');
-const middleware = require('../auth/middleware');
+const middleware = require('../auth');
 
-router.get('/', middleware(), async (req, res, next) => {
+router.get('/', middleware.auth(), middleware.async(async (req, res, next) => {
   res.render('addNote', {
     login: true,
-    like: await control.Like.takeRedis('myLike'),
+    like: await control.Like.takeRedis(`${req.user.id}`),
     username: req.user.username,
   });
-});
+}));
 
 
 module.exports = router;

@@ -8,4 +8,5 @@ module.exports = {
   addNote: require('./addNote'),
   pageNotes: require('./pageNotes'),
   tags: require('./tags'),
+  likes: require('./likes'),
 };
