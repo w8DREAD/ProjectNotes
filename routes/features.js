@@ -2,7 +2,7 @@ const express = require('express');
 const middleware = require('../auth');
 
 const router = express.Router();
-const mongo = require('../mongodb/mongo');
+const mongo = require('../db/mongo');
 
 const control = require('../mvc/control');
 

@@ -16,7 +16,7 @@ router.post('/', middleware.auth(), middleware.async(async (req, res, next) => {
   const userId = req.user.id;
   res.status(200).json({
     status: await control.Like.create({noteId, userId}),
-    likesCount: await control.Like.takeRedis(`${userId}`),
+    likesCount: await control.Like.takeRedis(userId),
   });
 }));
 

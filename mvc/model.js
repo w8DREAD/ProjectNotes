@@ -1,5 +1,5 @@
 const sqlite = require('sqlite3').verbose();
-
+const mongo = require('../db/mongo');
 
 const openDb = () => Promise.resolve(new sqlite.Database('data.db'));
 
@@ -84,7 +84,9 @@ class Comments extends Db {
 }
 
 class Likes extends Db {
-  static pushInDb(like) {
+  static async pushInDb(like) {
+    const emailWhoseLike = await run(db => selectFromTable(db, `SELECT email FROM users WHERE id = (SELECT userId FROM notes WHERE id = ${like.noteId})`));
+    await mongo.update(emailWhoseLike[0], { $inc: { myLike: 1 } });
     return run(db => workWithTable(db, 'INSERT INTO likes VALUES (?,?)', [like.noteId, like.userId]));
   }
 
@@ -120,15 +122,17 @@ class Likes extends Db {
     return usersWithLikes;
   }
 
-  static deleteFromDb(noteId, userId) {
+  static async deleteFromDb(noteId, userId) {
+    const emailWhoseLike = await run(db => selectFromTable(db, `SELECT email FROM users WHERE id = (SELECT userId FROM notes WHERE id = ${noteId})`));
+    await mongo.update(emailWhoseLike[0], { $inc: { myLike: -1 } });
     return run(db => selectFromTable(db, `DELETE FROM likes WHERE noteId = ${noteId} AND userId = ${userId}`));
   }
 }
 
 class Users extends Db {
-  static pushInDb(user) {
-    // mongo.save('users', user);
-    return run(db => workWithTable(db, 'INSERT INTO users VALUES (?,?,?,?,?,?,?,?)', [user.id, user.username, user.password, user.email, user.telephone, user.dateBirthday, 0, 0]));
+  static async pushInDb(user) {
+    await mongo.save(user);
+    return run(db => workWithTable(db, 'INSERT INTO users VALUES (?,?,?,?,?,?,?,?)', [user.id, user.username, user.password, user.email, user.dateBirthday, user.telephone, 0, 0]));
   }
 
   static giveNote(userId) {
@@ -145,6 +149,10 @@ class Users extends Db {
       return tags.reverse().splice(0, num);
     }
     return tags.reverse();
+  }
+
+  static deleteFromDb(id) {
+    return run(db => selectFromTable(db, `DELETE FROM users WHERE id = ${id}`));
   }
 }
 module.exports = {

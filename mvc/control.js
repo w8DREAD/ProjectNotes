@@ -1,5 +1,5 @@
 const handler = require('./model');
-const redis = require('../mongodb/redis');
+const redis = require('../db/redis');
 
 const statistics = [];
 setInterval(async () => {
@@ -49,10 +49,14 @@ class User {
     return users;
   }
 
+  static delete(id) {
+    handler.Users.deleteFromDb(id);
+  }
+
   static async create(user) {
     const newUser = new User(user.username, user.password,
       user.email, user.telephone, user.dateBirthday);
-    const email = await handler.Users.takeFromDb(`SELECT * FROM users WHERE '${user.email}'`);
+    const email = await handler.Users.takeFromDb(`SELECT * FROM users WHERE email = '${user.email}'`);
     if (email[0]) {
       return false;
     }
@@ -61,9 +65,7 @@ class User {
 
   static async redisLike(userId) {
     const likesCount = await handler.Likes.takeFromDb(`SELECT COUNT(*) AS count FROM likes WHERE (SELECT id AS noteId FROM notes WHERE userId = ${userId})`);
-    const likes = await handler.Notes.takeFromDb('SELECT * FROM likes');
-    console.log(likes);
-    redis.save(`${userId}`, likesCount[0].count);
+    await redis.save(`${userId}`, likesCount[0].count);
     return true;
   }
 }
@@ -77,6 +79,7 @@ class Note {
   }
 
   static async reproduce() {
+    console.log(await handler.Users.takeFromDb('SELECT * FROM users'));
     const notesFromDb = await handler.Notes.takeFromDb('SELECT * FROM notes');
     for (const note of notesFromDb) {
       const tags = await handler.Tags.takeFromDb(`SELECT * FROM tags WHERE noteId = ${note.id}`);
@@ -175,6 +178,7 @@ class Like {
     const likeExists = await handler.Likes.takeFromDb(`SELECT COUNT(*) AS count FROM likes WHERE noteId = ${noteId} AND userId = ${userId}`);
     if (!likeExists[0].count) {
       await handler.Likes.pushInDb(like);
+      await User.redisLike(userId);
       return true;
     }
     await handler.Likes.deleteFromDb(noteId, userId);

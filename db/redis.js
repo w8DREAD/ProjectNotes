@@ -21,11 +21,14 @@ function take(prop) {
 }
 
 function save(prop, value) {
-  client.set(prop, value, (err) => {
-    if (err) {
-      console.log(`Что то случилось при записи: ${err}`);
-      client.quit();
-    }
+  return new Promise((resolve, reject) => {
+    client.set(prop, value, (err) => {
+      if (err) {
+        console.log(`Что то случилось при записи: ${err}`);
+        client.quit();
+      }
+      resolve(true);
+    });
   });
 }
 
