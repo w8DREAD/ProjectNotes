@@ -75,7 +75,7 @@ class Notes extends Db {
 class Comments extends Db {
   static async pushInDb(comment) {
     await run(db => workWithTable(db, 'INSERT INTO comments VALUES (?,?,?,?)', [comment.id, comment.text, comment.noteId, comment.userId]));
-    return run(db => selectFromTable(db, 'SELECT last_insert_id() AS id'));
+    return run(db => selectFromTable(db, 'SELECT last_insert_rowid() AS id'));
   }
 
   static deleteFromDb(id) {
@@ -120,13 +120,14 @@ class Likes extends Db {
     return usersWithLikes;
   }
 
-  static deleteFromDb(id) {
-    return run(db => selectFromTable(db, `DELETE FROM likes WHERE noteId = ${id}`));
+  static deleteFromDb(noteId, userId) {
+    return run(db => selectFromTable(db, `DELETE FROM likes WHERE noteId = ${noteId} AND userId = ${userId}`));
   }
 }
 
 class Users extends Db {
   static pushInDb(user) {
+    // mongo.save('users', user);
     return run(db => workWithTable(db, 'INSERT INTO users VALUES (?,?,?,?,?,?,?,?)', [user.id, user.username, user.password, user.email, user.telephone, user.dateBirthday, 0, 0]));
   }
 
