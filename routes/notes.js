@@ -20,7 +20,7 @@ router.post('/', middleware.auth(), middleware.async(async (req, res, next) => {
   if (invalid) {
     return res.status(400).json(invalid);
   }
-  await control.Note.create(note);
+  await control.Note.create(note, req.user);
   res.redirect('/pageNotes');
 }));
 

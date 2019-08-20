@@ -1,25 +1,58 @@
 const sqlite = require('sqlite3').verbose();
 const mongo = require('../db/mongo');
+const redis = require('../db/redis/redis');
 
-const updateTags = tag => new Promise(async (resolve, reject) => {
+const recountMaxLikes = async () => {
+  const allLikes = await redis.hgetall('likes');
+  let maxLikes = 0;
+  for (const likes in allLikes) {
+    if (Number(allLikes[likes]) > maxLikes) maxLikes = Number(allLikes[likes]);
+  }
+  await redis.set('maxLikes', maxLikes);
+  return maxLikes;
+};
+
+const recountMaxLikesLast10Notes = async () => {
+  const allLikes = await redis.hgetall('last10NotesLike');
+  let maxLikes = 0;
+  for (const likes in allLikes) {
+    if (Number(allLikes[likes]) > maxLikes) maxLikes = Number(allLikes[likes]);
+  }
+  await redis.set('maxLikesLast10Notes', maxLikes);
+  return maxLikes;
+};
+
+const raitingAllLikes = async () => {
+  const maxLikes = await recountMaxLikes();
+  const usersLikes = await redis.hgetall('likes');
+  for (const user in usersLikes) {
+    const userRaiting = Math.round((Number(usersLikes[user]) / maxLikes) * 100);
+    await mongo.update({email: user}, { $set: { raitingUserLikes: userRaiting }});
+  }
+  return true;
+};
+
+const raitingLikesLast10Notes = async () => {
+  const maxLikes = await recountMaxLikesLast10Notes();
+  const usersLikes = await redis.hgetall('last10NotesLike');
+  for (const user in usersLikes) {
+    const userRaiting = Math.round((Number(usersLikes[user]) / maxLikes) * 100);
+    await mongo.update({email: user}, { $set: { raitingUserLikesLast10Notes: userRaiting }});
+  }
+  return true;
+};
+
+const updateTags = async (tag) => {
   const userId = await run(db => selectFromTable(db, `SELECT * FROM users WHERE id IN (SELECT userId FROM notes WHERE id = ${tag.noteId})`));
   const tagsText = await run(db => selectFromTable(db, `SELECT DISTINCT tag FROM tags WHERE noteId IN (SELECT id FROM notes WHERE userId = ${userId[0].id})`));
-  const db = await mongo.dbo;
-  db.collection('users').updateOne({email: userId[0].email}, { $set: { allTags: tagsText }}, (err, res) => {
-    if (err) reject(err);
-    resolve(res);
-  });
-});
+  return mongo.update({email: userId[0].email}, { $set: { allTags: tagsText }});
+};
 
-const updateLast10Tags = tag => new Promise(async (resolve, reject) => {
+const updateLast10Tags = async (tag) => {
   const userId = await run(db => selectFromTable(db, `SELECT * FROM users WHERE id = (SELECT userId FROM notes WHERE id = ${tag.noteId})`));
   const lastTags10notes = await run(db => selectFromTable(db, `SELECT DISTINCT tag FROM tags WHERE noteId IN (SELECT id FROM notes WHERE userId = ${userId[0].id} ORDER BY date DESC LIMIT 10)`));
-  const db = await mongo.dbo;
-  db.collection('users').updateOne({email: userId[0].email}, { $set: { last10Tags: lastTags10notes }}, (err, res) => {
-    if (err) reject(err);
-    resolve(res);
-  });
-});
+  return mongo.update({email: userId[0].email}, { $set: { last10Tags: lastTags10notes }});
+};
 
 const openDb = () => Promise.resolve(new sqlite.Database('data.db'));
 
@@ -109,44 +142,16 @@ class Likes extends Db {
   static async pushInDb(like) {
     const emailWhoseLike = await run(db => selectFromTable(db, `SELECT email FROM users WHERE id = (SELECT userId FROM notes WHERE id = ${like.noteId})`));
     await mongo.update(emailWhoseLike[0], { $inc: { myLike: 1 } });
+    raitingAllLikes();
+    raitingLikesLast10Notes();
     return run(db => workWithTable(db, 'INSERT INTO likes VALUES (?,?)', [like.noteId, like.userId]));
-  }
-
-  static async raitingAllUsers(num = 0) {
-    const result = [];
-    let notes = [];
-    const usersWithLikes = [];
-    if (num) {
-      const fromDb = await run(db => selectFromTable(db, 'SELECT * FROM notes'));
-      notes = fromDb.reverse().splice(0, num);
-    } else {
-      notes = await run(db => selectFromTable(db, 'SELECT * FROM notes'));
-    }
-
-    const users = await run(db => selectFromTable(db, 'SELECT * FROM users'));
-    for (const user of users) {
-      let likes = 0;
-      for (const note of notes) {
-        if (+note.userId === +user.id) {
-          const like = await run(db => selectFromTable(db, `SELECT * FROM likes WHERE noteId = ${+note.id}`));
-          likes += like.length;
-        }
-      }
-      result.push(likes);
-      user.myLike = likes;
-      usersWithLikes.push(user);
-    }
-    const maxLikes = Math.max.apply(null, result);
-    for (const user of usersWithLikes) {
-      user.raiting = Math.round((user.myLike / maxLikes) * 100) || 0;
-      // await mongo.update('users', {email: user.email}, user);
-    }
-    return usersWithLikes;
   }
 
   static async deleteFromDb(noteId, userId) {
     const emailWhoseLike = await run(db => selectFromTable(db, `SELECT email FROM users WHERE id = (SELECT userId FROM notes WHERE id = ${noteId})`));
     await mongo.update(emailWhoseLike[0], { $inc: { myLike: -1 } });
+    raitingAllLikes();
+    raitingLikesLast10Notes();
     return run(db => selectFromTable(db, `DELETE FROM likes WHERE noteId = ${noteId} AND userId = ${userId}`));
   }
 }
@@ -176,7 +181,19 @@ class Users extends Db {
   static deleteFromDb(id) {
     return run(db => selectFromTable(db, `DELETE FROM users WHERE id = ${id}`));
   }
+
+  static async countActivity() {
+    const allActivity = await redis.hgetall('activity');
+    console.log(allActivity);
+    for (const user in allActivity) {
+      const act = Math.round((Number(allActivity[user]) / (Number(allActivity[user]) + 1)) * 100) / 100;
+      console.log(act);
+      mongo.update({email: `${user}`}, {
+        $set: {Activity: act},
+      });
+    }
+  }
 }
 module.exports = {
-  Notes, Comments, Likes, Users, Tags,
+  Notes, Comments, Likes, Users, Tags, recountMaxLikes, recountMaxLikesLast10Notes,
 };

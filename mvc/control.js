@@ -1,11 +1,6 @@
 const handler = require('./model');
 const redis = require('../db/redis/redis');
 
-const statistics = [];
-setInterval(async () => {
-  statistics.splice(0, 1);
-}, 25000);
-
 function formatDate() {
   const date = new Date();
   let dd = date.getDate();
@@ -26,6 +21,7 @@ function formatDate() {
   return `${dd}.${mm}.${yy} в ${hh}:${min}`;
 }
 
+
 class User {
   constructor(name, password, email, telephone, dateBirthday) {
     this.username = name;
@@ -36,17 +32,10 @@ class User {
     this.myLike = 0;
   }
 
-  static async activity() {
-    const users = await handler.Users.takeFromDb('SELECT * FROM users');
-    for (const user of users) {
-      user.activity = 1;
-      for (const userId of statistics) {
-        if (userId === user.id) user.activity += 1;
-      }
-      const activity = user.activity - 1;
-      user.activity = Math.round((activity / user.activity) * 100) / 100;
-    }
-    return users;
+  static activity(user) {
+    redis.hincrby('activity', `${user.email}`, 1);
+    setTimeout(redis.hincrby, 1000 * 60 * 5, 'activity', `${user.email}`, -1);
+    return true;
   }
 
   static delete(id) {
@@ -65,9 +54,9 @@ class User {
 
   static async redisLike(user) {
     const likesCount = await handler.Likes.takeFromDb(`SELECT COUNT(*) AS count FROM likes WHERE noteId IN (SELECT id FROM notes WHERE userId = ${user.id})`);
-    const likes = await redis.hgetall('likes');
-    console.log(likes);
+    const last10NotesLikes = await handler.Likes.takeFromDb(`SELECT COUNT(*) AS count FROM likes WHERE noteId IN (SELECT id FROM notes WHERE userId = ${user.id} ORDER BY date DESC LIMIT 10)`);
     await redis.hset('likes', `${user.email}`, likesCount[0].count);
+    await redis.hset('last10NotesLike', `${user.email}`, last10NotesLikes[0].count);
     return true;
   }
 }
@@ -81,6 +70,7 @@ class Note {
   }
 
   static async reproduce() {
+    await handler.Users.countActivity();
     const notesFromDb = await handler.Notes.takeFromDb('SELECT * FROM notes');
     for (const note of notesFromDb) {
       const tags = await handler.Tags.takeFromDb(`SELECT * FROM tags WHERE noteId = ${note.id}`);
@@ -94,8 +84,9 @@ class Note {
     return notesFromDb;
   }
 
-  static create(data) {
+  static create(data, user) {
     const note = new Note(data.text, data.userId);
+    User.activity(user);
     return handler.Notes.pushInDb(note);
   }
 
@@ -144,9 +135,9 @@ class Comment {
     this.text = text;
   }
 
-  static create(dataComment) {
+  static create(dataComment, user) {
     const comment = new Comment(dataComment.id, dataComment.text, dataComment.userId);
-    statistics.unshift(dataComment.userId);
+    User.activity(user);
     return handler.Comments.pushInDb(comment);
   }
 

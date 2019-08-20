@@ -9,41 +9,16 @@ const dbo = new Promise((resolve, reject) => mongoClient.connect((err, data) => 
   resolve(data.db('usersdb'));
 }));
 
-// const take = (collection, findKey) => new Promise(async (resolve, reject) => {
-//   const db = await dbo;
-//   const mySort = { raiting: -1 };
-//   db.collection(collection).find(findKey).sort(mySort).toArray((err, res) => {
-//     if (err) reject(err);
-//     resolve(res);
-//   });
-// });
-//
-//
 async function save(data) {
   const db = await dbo;
-  return new Promise((resolve, reject) => {
-    db.collection('users').insertOne(data, (err, res) => {
-      if (err) reject(err);
-      resolve(res);
-    });
-  });
+  return db.collection('users').insertOne(data);
 }
 
-const update = (where, newValue) => new Promise(async (resolve, reject) => {
+const update = async (where, newValue) => {
   const db = await dbo;
-  db.collection('users').updateOne(where, newValue, (err, res) => {
-    if (err) reject(err);
-    resolve(res);
-  });
-});
+  return db.collection('users').updateOne(where, newValue);
+};
 
-//
-// async function drop(collection) {
-//   const db = await dbo;
-//   db.collection(collection).drop();
-// }
-//
 module.exports = {
-  // take,  drop,
-  save, update, dbo,
+  save, update,
 };
