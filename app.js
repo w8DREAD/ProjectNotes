@@ -13,7 +13,7 @@ const app = express();
 
 
 require('./auth/passport')(app);
-require('./db/redis');
+require('./db/redis/redis');
 
 app
   .use(logger('dev'))

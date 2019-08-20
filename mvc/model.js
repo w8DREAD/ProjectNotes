@@ -1,6 +1,26 @@
 const sqlite = require('sqlite3').verbose();
 const mongo = require('../db/mongo');
 
+const updateTags = tag => new Promise(async (resolve, reject) => {
+  const userId = await run(db => selectFromTable(db, `SELECT * FROM users WHERE id IN (SELECT userId FROM notes WHERE id = ${tag.noteId})`));
+  const tagsText = await run(db => selectFromTable(db, `SELECT DISTINCT tag FROM tags WHERE noteId IN (SELECT id FROM notes WHERE userId = ${userId[0].id})`));
+  const db = await mongo.dbo;
+  db.collection('users').updateOne({email: userId[0].email}, { $set: { allTags: tagsText }}, (err, res) => {
+    if (err) reject(err);
+    resolve(res);
+  });
+});
+
+const updateLast10Tags = tag => new Promise(async (resolve, reject) => {
+  const userId = await run(db => selectFromTable(db, `SELECT * FROM users WHERE id = (SELECT userId FROM notes WHERE id = ${tag.noteId})`));
+  const lastTags10notes = await run(db => selectFromTable(db, `SELECT DISTINCT tag FROM tags WHERE noteId IN (SELECT id FROM notes WHERE userId = ${userId[0].id} ORDER BY date DESC LIMIT 10)`));
+  const db = await mongo.dbo;
+  db.collection('users').updateOne({email: userId[0].email}, { $set: { last10Tags: lastTags10notes }}, (err, res) => {
+    if (err) reject(err);
+    resolve(res);
+  });
+});
+
 const openDb = () => Promise.resolve(new sqlite.Database('data.db'));
 
 async function run(queryfn) {
@@ -46,7 +66,9 @@ function closeDb(db) {
 }
 class Tags extends Db {
   static async pushInDb(tag) {
-    return run(db => workWithTable(db, 'INSERT INTO tags VALUES (?,?,?)', [tag.id, tag.noteId, tag.text]));
+    await run(db => workWithTable(db, 'INSERT INTO tags VALUES (?,?,?)', [tag.id, tag.text, tag.noteId]));
+    await updateTags(tag);
+    return updateLast10Tags(tag);
   }
 
   static deleteFromDb(id) {

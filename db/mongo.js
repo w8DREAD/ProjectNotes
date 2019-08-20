@@ -36,6 +36,7 @@ const update = (where, newValue) => new Promise(async (resolve, reject) => {
     resolve(res);
   });
 });
+
 //
 // async function drop(collection) {
 //   const db = await dbo;
@@ -44,5 +45,5 @@ const update = (where, newValue) => new Promise(async (resolve, reject) => {
 //
 module.exports = {
   // take,  drop,
-  save, update,
+  save, update, dbo,
 };

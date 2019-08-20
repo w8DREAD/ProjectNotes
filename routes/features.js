@@ -8,7 +8,6 @@ const control = require('../mvc/control');
 
 router.get('/', middleware.auth(), middleware.async(async (req, res, next) => {
   // await control.User.activity();
-  const userId = req.user.id;
   // const num = 5;
   // await control.Like.raiting();
   // const users = await mongo.take('users');
@@ -34,7 +33,7 @@ router.get('/', middleware.auth(), middleware.async(async (req, res, next) => {
   res.render('features', {
     username: req.user.username,
     login: true,
-    like: await control.Like.takeRedis(`${userId}`),
+    like: await control.Like.takeRedis(`${req.user.email}`),
     features: 'Рейтинг всех пользователей по набранным лайкам:',
     addClassFeatures: 'active',
   });

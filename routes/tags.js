@@ -8,13 +8,13 @@ const middleware = require('../auth');
 router.post('/', middleware.auth(), middleware.async(async (req, res, next) => {
   const tag = {
     text: req.body.tag,
-    noteId: +req.body.noteId,
+    noteId: Number(req.body.noteId),
   };
   await control.Tag.create(tag);
   res.status(201).json('ok');
 }));
 
-router.delete('/:id', middleware.auth(), middleware.rightsNoteTags(), middleware.async(async (req, res, next) => {
+router.delete('/:id', middleware.auth(), middleware.rightsNoteTag(), middleware.async(async (req, res, next) => {
   const {id} = req.params;
   await control.Tag.delete(id);
   console.log('loading page');

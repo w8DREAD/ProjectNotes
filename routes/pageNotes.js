@@ -13,17 +13,15 @@ app.use(bodyParser.json());
 
 
 router.get('/', middleware.async(async (req, res, next) => {
-  let userId;
+
   let name;
   let log = false;
   let likes = 0;
 
   if (req.user) {
-    userId = req.user.id;
     log = true;
     name = req.user.username;
-    await control.User.redisLike(userId);
-    likes = await control.Like.takeRedis(userId);
+    likes = await control.Like.takeRedis(req.user.email);
   }
   const notes = await control.Note.reproduce() || [];
   res.render('notes', {

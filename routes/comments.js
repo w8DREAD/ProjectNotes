@@ -25,7 +25,7 @@ router.post('/', middleware.auth(), middleware.async(async (req, res, next) => {
   res.status(200).json({author: req.user.username, id: commentId[0].id});
 }));
 
-router.delete('/:id', middleware.auth(), middleware.rightsComments(), middleware.async(async (req, res, next) => {
+router.delete('/:id', middleware.auth(), middleware.rightsComment(), middleware.async(async (req, res, next) => {
   const {id} = req.params;
   await control.Comment.delete(id);
   console.log('loading page');
