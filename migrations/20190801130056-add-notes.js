@@ -15,7 +15,7 @@ exports.setup = function (options, seedLink) {
 exports.up = function (db) {
   db.all('PRAGMA foreign_keys = ON');
   return db.runSql('CREATE TABLE notes (id INTEGER PRIMARY KEY AUTOINCREMENT, text VARCHAR, date VARCHAR,\n'
-    + 'userId INTEGER NOT NULL REFERENCES users (id))');
+    + 'userId INTEGER REFERENCES users (id) ON DELETE CASCADE NOT NULL)');
 };
 
 exports.down = function (db) {

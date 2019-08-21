@@ -20,11 +20,11 @@ router.post('/', middleware.auth(), middleware.async(async (req, res, next) => {
   if (invalid) {
     return res.status(400).json(invalid);
   }
-  await control.Note.create(note);
+  await control.Note.create(note, req.user);
   res.redirect('/pageNotes');
 }));
 
-router.put('/:id', middleware.auth(), middleware.rightsNoteTags(), middleware.async(async (req, res, next) => {
+router.put('/:id', middleware.auth(), middleware.rightsNoteTag(), middleware.async(async (req, res, next) => {
   const text = req.body;
   const {id} = req.params;
   const valid = schemes.validator(schemes.editNote, text);

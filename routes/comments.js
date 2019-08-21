@@ -21,11 +21,11 @@ router.post('/', middleware.auth(), middleware.async(async (req, res, next) => {
   if (valid) {
     return res.status(400).json(valid);
   }
-  const commentId = await control.Comment.create(comment);
+  const commentId = await control.Comment.create(comment, req.user);
   res.status(200).json({author: req.user.username, id: commentId[0].id});
 }));
 
-router.delete('/:id', middleware.auth(), middleware.rightsComments(), middleware.async(async (req, res, next) => {
+router.delete('/:id', middleware.auth(), middleware.rightsComment(), middleware.async(async (req, res, next) => {
   const {id} = req.params;
   await control.Comment.delete(id);
   console.log('loading page');

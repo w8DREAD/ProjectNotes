@@ -13,10 +13,10 @@ app.use(bodyParser.json());
 
 router.post('/', middleware.auth(), middleware.async(async (req, res, next) => {
   const {noteId} = req.body;
-  const userId = req.user.id;
+  const user = req.user;
   res.status(200).json({
-    status: await control.Like.create({noteId, userId}),
-    likesCount: await control.Like.takeRedis(`${userId}`),
+    status: await control.Like.create({noteId, user}),
+    likesCount: await control.Like.takeRedis(user.email),
   });
 }));
 

@@ -15,7 +15,7 @@ if (document.querySelector('button.register-user')) {
       telephone: +telephone.value,
       dateBirthday: dateBirthday.value,
     });
-    xhr('post', '/api/v1/users/register', json, 'application/json')
+    xhr('post', '/api/v1/users/', json, 'application/json')
       .then(() => {
         window.location.href = './login';
       })

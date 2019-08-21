@@ -22,7 +22,7 @@ router.get('/login', (req, res, next) => {
   }
 });
 
-router.post('/register', middleware.async(async (req, res, next) => {
+router.post('/', middleware.async(async (req, res, next) => {
   const user = req.body;
   const valid = schema.validator(schema.register, user);
   if (valid) {
@@ -32,6 +32,12 @@ router.post('/register', middleware.async(async (req, res, next) => {
     return res.redirect('/api/v1/users/login');
   }
   return res.status(400).json('На эту почту уже зарегестрирован пользователь!');
+}));
+
+router.delete('/:id', middleware.async(async (req, res, next) => {
+  const {id} = req.params;
+  await control.User.delete(id);
+  return res.redirect('/api/v1/users/login');
 }));
 
 router.get('/logout', middleware.auth(), (req, res) => {

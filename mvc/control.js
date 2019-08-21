@@ -1,10 +1,5 @@
 const handler = require('./model');
-const redis = require('../mongodb/redis');
-
-const statistics = [];
-setInterval(async () => {
-  statistics.splice(0, 1);
-}, 25000);
+const redis = require('../db/redis/redis');
 
 function formatDate() {
   const date = new Date();
@@ -26,6 +21,7 @@ function formatDate() {
   return `${dd}.${mm}.${yy} в ${hh}:${min}`;
 }
 
+
 class User {
   constructor(name, password, email, telephone, dateBirthday) {
     this.username = name;
@@ -36,34 +32,31 @@ class User {
     this.myLike = 0;
   }
 
-  static async activity() {
-    const users = await handler.Users.takeFromDb('SELECT * FROM users');
-    for (const user of users) {
-      user.activity = 1;
-      for (const userId of statistics) {
-        if (userId === user.id) user.activity += 1;
-      }
-      const activity = user.activity - 1;
-      user.activity = Math.round((activity / user.activity) * 100) / 100;
-    }
-    return users;
+  static activity(user) {
+    redis.hincrby('activity', `${user.email}`, 1);
+    setTimeout(redis.hincrby, 1000 * 60 * 5, 'activity', `${user.email}`, -1);
+    return true;
+  }
+
+  static delete(id) {
+    handler.Users.deleteFromDb(id);
   }
 
   static async create(user) {
     const newUser = new User(user.username, user.password,
       user.email, user.telephone, user.dateBirthday);
-    const email = await handler.Users.takeFromDb(`SELECT * FROM users WHERE '${user.email}'`);
+    const email = await handler.Users.takeFromDb(`SELECT * FROM users WHERE email = '${user.email}'`);
     if (email[0]) {
       return false;
     }
     return handler.Users.pushInDb(newUser);
   }
 
-  static async redisLike(userId) {
-    const likesCount = await handler.Likes.takeFromDb(`SELECT COUNT(*) AS count FROM likes WHERE (SELECT id AS noteId FROM notes WHERE userId = ${userId})`);
-    const likes = await handler.Notes.takeFromDb('SELECT * FROM likes');
-    console.log(likes);
-    redis.save(`${userId}`, likesCount[0].count);
+  static async redisLike(user) {
+    const likesCount = await handler.Likes.takeFromDb(`SELECT COUNT(*) AS count FROM likes WHERE noteId IN (SELECT id FROM notes WHERE userId = ${user.id})`);
+    const last10NotesLikes = await handler.Likes.takeFromDb(`SELECT COUNT(*) AS count FROM likes WHERE noteId IN (SELECT id FROM notes WHERE userId = ${user.id} ORDER BY date DESC LIMIT 10)`);
+    await redis.hset('likes', `${user.email}`, likesCount[0].count);
+    await redis.hset('last10NotesLike', `${user.email}`, last10NotesLikes[0].count);
     return true;
   }
 }
@@ -77,6 +70,7 @@ class Note {
   }
 
   static async reproduce() {
+    await handler.Users.countActivity();
     const notesFromDb = await handler.Notes.takeFromDb('SELECT * FROM notes');
     for (const note of notesFromDb) {
       const tags = await handler.Tags.takeFromDb(`SELECT * FROM tags WHERE noteId = ${note.id}`);
@@ -90,8 +84,9 @@ class Note {
     return notesFromDb;
   }
 
-  static create(data) {
+  static create(data, user) {
     const note = new Note(data.text, data.userId);
+    User.activity(user);
     return handler.Notes.pushInDb(note);
   }
 
@@ -124,7 +119,7 @@ class Tag {
   }
 
   static create(data) {
-    const tag = new Tag(data.text, data.noteId);
+    const tag = new Tag(data.noteId, data.text);
     return handler.Tags.pushInDb(tag);
   }
 
@@ -140,9 +135,9 @@ class Comment {
     this.text = text;
   }
 
-  static create(dataComment) {
+  static create(dataComment, user) {
     const comment = new Comment(dataComment.id, dataComment.text, dataComment.userId);
-    statistics.unshift(dataComment.userId);
+    User.activity(user);
     return handler.Comments.pushInDb(comment);
   }
 
@@ -170,15 +165,17 @@ class Like {
     this.userId = userId;
   }
 
-  static async create({ noteId, userId }) {
-    const like = new Like(noteId, userId);
-    const likeExists = await handler.Likes.takeFromDb(`SELECT COUNT(*) AS count FROM likes WHERE noteId = ${noteId} AND userId = ${userId}`);
+  static async create({ noteId, user }) {
+    const like = new Like(noteId, user.id);
+    const likeExists = await handler.Likes.takeFromDb(`SELECT COUNT(*) AS count FROM likes WHERE noteId = ${noteId} AND userId = ${user.id}`);
+    const whoseLike = await handler.Likes.takeFromDb(`SELECT * FROM users WHERE id IN (SELECT userId AS id FROM notes WHERE id = ${noteId})`);
     if (!likeExists[0].count) {
       await handler.Likes.pushInDb(like);
+      await User.redisLike(whoseLike[0]);
       return true;
     }
-    await handler.Likes.deleteFromDb(noteId, userId);
-    await User.redisLike(userId);
+    await handler.Likes.deleteFromDb(noteId, user.id);
+    await User.redisLike(whoseLike[0]);
     return false;
   }
 
@@ -187,7 +184,7 @@ class Like {
   }
 
   static takeRedis(prop) {
-    return redis.take(prop);
+    return redis.hget('likes', prop);
   }
 }
 module.exports = {

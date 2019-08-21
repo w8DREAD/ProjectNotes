@@ -1,7 +1,7 @@
 module.exports = {
   auth: require('./middleware'),
   async: require('./asyncMiddleware'),
-  rightsNoteTags: require('./rightsMiddleware').rightsNoteTags,
-  rightsComments: require('./rightsMiddleware').rightsComments,
+  rightsNoteTag: require('./rightsMiddleware').rightsNoteTag,
+  rightsComment: require('./rightsMiddleware').rightsComment,
 
 };
